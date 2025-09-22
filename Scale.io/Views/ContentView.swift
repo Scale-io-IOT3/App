@@ -2,22 +2,33 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var context
-    @ObservedObject private var foodVm = FoodViewModel()
+    @StateObject private var foodVm = FoodViewModel()
+    @State private var foods: [Food] = []
+    @State private var search: String = ""
     var body: some View {
-        VStack{
-            Text("View")
+        NavigationStack {
+            FoodListView(foods: $foods)
+                .overlay {
+                    if foods.isEmpty {
+                        ContentUnavailableView("No Foods", systemImage: "leaf", description: Text("Fetching results…"))
+                    }
+                }
         }
-        .onAppear {
-            Task {
-                let f = await foodVm.getFreshFood(food: "banana",quantity: 10)
-                print(f[0])
+        .searchable(text: $search)
+        .task(id: search) {
+            guard !search.isEmpty else {
+                return
             }
+
+            try? await Task.sleep(nanoseconds: 750_000_000)
+            guard !Task.isCancelled else { return }
+
+            self.foods = await foodVm.getFreshFood(food: search)
         }
+
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(DataManager.shared.container)
 }

@@ -10,8 +10,7 @@ class FoodViewModel: ObservableObject {
         let request = type.makeRequest(food: food, grams: grams)
         
         do {
-            let response = try await service.get(request: request)
-            self.foods = response.foods.toDomain()
+            self.foods = try await service.fetchFoods(request: request)
         } catch {
             self.foods = []
         }
