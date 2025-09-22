@@ -2,7 +2,6 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var context
     @ObservedObject private var foodVm = FoodViewModel()
     var body: some View {
         VStack{
@@ -10,8 +9,8 @@ struct ContentView: View {
         }
         .onAppear {
             Task {
-                let f = await foodVm.getFreshFood(food: "banana",quantity: 10)
-                print(f[0])
+                let f = await foodVm.getFreshFood(food: "banana")
+                print(f)
             }
         }
     }
