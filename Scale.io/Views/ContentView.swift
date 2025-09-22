@@ -1,4 +1,3 @@
-import SwiftData
 import SwiftUI
 
 struct ContentView: View {
@@ -21,23 +20,17 @@ struct ContentView: View {
         }
         .searchable(text: $search)
         .task(id: search) {
-            clearState()
-            await debounce()
+            guard !search.isEmpty else {
+                isLoading = false
+                foods = []
+                return
+            }
+
+            try? await Task.sleep(nanoseconds: 700000000)
+            guard !Task.isCancelled else { return }
+
             await fetch()
         }
-    }
-
-    private func clearState() {
-        guard !search.isEmpty else {
-            isLoading = false
-            foods = []
-            return
-        }
-    }
-
-    private func debounce() async {
-        try? await Task.sleep(nanoseconds: 700000000)
-        guard !Task.isCancelled else { return }
     }
 
     private func fetch() async {

@@ -1,57 +1,27 @@
 import Foundation
-import SwiftData
 
-@Model
-class Food: CustomStringConvertible {
-    var name: String
-    var brands: String
-    var macros: Macros
-
-    init(name: String, brands: String, macros: Macros) {
-        self.name = name
-        self.brands = brands
-        self.macros = macros
-    }
-
-    var description: String {
-        "Food(name: \(name), brands: \(brands), macros: \(macros))"
+// MARK: - Food
+struct Food: Codable, Identifiable{
+    var id : UUID = .init()
+    let name, brands: String
+    let macros: Macros
+    
+    enum CodingKeys: CodingKey {
+        case name
+        case brands
+        case macros
     }
 }
 
-@Model
-class Macros: CustomStringConvertible {
-    var calories: Int
-    var carbs: Double
-    var fat: Double
-    var proteins: Double
-    var percentages: Percentages
-
-    init(calories: Int, carbs: Double, fat: Double, proteins: Double, percentages: Percentages) {
-        self.calories = calories
-        self.carbs = carbs
-        self.fat = fat
-        self.proteins = proteins
-        self.percentages = percentages
-    }
-
-    var description: String {
-        "Macros(calories: \(calories), carbs: \(carbs), fat: \(fat), proteins: \(proteins), percentages: \(percentages))"
-    }
+// MARK: - Macros
+struct Macros: Codable {
+    let calories: Int
+    let carbohydrates, fat, proteins: Double
+    let percentages: Percentages
 }
 
-@Model
-class Percentages: CustomStringConvertible {
-    var carbs: Double
-    var fat: Double
-    var proteins: Double
-
-    init(carbs: Double, fat: Double, proteins: Double) {
-        self.carbs = carbs
-        self.fat = fat
-        self.proteins = proteins
-    }
-
-    var description: String {
-        "Percentages(carbs: \(carbs), fat: \(fat), proteins: \(proteins))"
-    }
+// MARK: - Percentages
+struct Percentages: Codable {
+    let carbs, fat, proteins: Double
 }
+

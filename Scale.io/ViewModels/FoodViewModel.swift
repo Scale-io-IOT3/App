@@ -3,13 +3,8 @@ internal import Combine
 
 class FoodViewModel: ObservableObject {
     @Published private(set) var foods: [Food] = []
-
     private let service = FoodService()
-    private let repository = FoodRepository()
 
-    public func getCache() -> [Food] {
-        return (try? repository.load()) ?? []
-    }
 
     public func getFreshFood(food: String, quantity: Double = 100) async -> [Food] {
         return await fetch(type: .fresh, food: food, grams: quantity)
