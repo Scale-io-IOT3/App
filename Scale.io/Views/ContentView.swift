@@ -5,27 +5,45 @@ struct ContentView: View {
     @StateObject private var foodVm = FoodViewModel()
     @State private var foods: [Food] = []
     @State private var search: String = ""
+    @State private var isLoading: Bool = false
+
     var body: some View {
         NavigationStack {
             FoodListView(foods: $foods)
                 .overlay {
-                    if foods.isEmpty {
-                        ContentUnavailableView("No Foods", systemImage: "leaf", description: Text("Fetching results…"))
+                    if isLoading {
+                        ProgressView()
+                            .controlSize(.regular)
+                    } else if foods.isEmpty {
+                        ContentUnavailableView.search(text: search)
                     }
                 }
         }
         .searchable(text: $search)
         .task(id: search) {
-            guard !search.isEmpty else {
-                return
-            }
-
-            try? await Task.sleep(nanoseconds: 750_000_000)
-            guard !Task.isCancelled else { return }
-
-            self.foods = await foodVm.getFreshFood(food: search)
+            clearState()
+            await debounce()
+            await fetch()
         }
+    }
 
+    private func clearState() {
+        guard !search.isEmpty else {
+            isLoading = false
+            foods = []
+            return
+        }
+    }
+
+    private func debounce() async {
+        try? await Task.sleep(nanoseconds: 700000000)
+        guard !Task.isCancelled else { return }
+    }
+
+    private func fetch() async {
+        isLoading = true
+        defer { isLoading = false }
+        foods = await foodVm.getFreshFood(food: search)
     }
 }
 
