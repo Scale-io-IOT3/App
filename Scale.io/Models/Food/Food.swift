@@ -1,6 +1,5 @@
 import Foundation
 
-// MARK: - Food
 struct Food: Codable, Identifiable{
     var id : UUID = .init()
     let name, brands: String
@@ -12,16 +11,3 @@ struct Food: Codable, Identifiable{
         case macros
     }
 }
-
-// MARK: - Macros
-struct Macros: Codable {
-    let calories: Int
-    let carbohydrates, fat, proteins: Double
-    let percentages: Percentages
-}
-
-// MARK: - Percentages
-struct Percentages: Codable {
-    let carbs, fat, proteins: Double
-}
-
