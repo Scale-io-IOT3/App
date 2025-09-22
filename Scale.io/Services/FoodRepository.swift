@@ -11,9 +11,9 @@ class FoodRepository {
         return try context.fetch(descriptor).first
     }
     
-    func load() throws -> Food? {
+    func load() throws -> [Food] {
         let descriptor = FetchDescriptor<Food>()
-        return try context.fetch(descriptor).first
+        return try context.fetch(descriptor)
     }
 
     func save(_ food: Food) throws {
