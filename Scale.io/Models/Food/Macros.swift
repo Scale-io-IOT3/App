@@ -1,7 +1,6 @@
 import Foundation
 
 struct Macros: Codable {
-    let calories: Int
     let carbohydrates, fat, proteins: Double
     let percentages: Percentages
 }

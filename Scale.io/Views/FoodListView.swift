@@ -19,7 +19,7 @@ struct FoodListView: View {
                 .truncationMode(.tail)
 
                 HStack(spacing: 12) {
-                    Text("Calories: \(food.macros.calories)")
+                    Text("Calories: \(food.calories)")
                     Text("Carbs: \(format(food.macros.carbohydrates))g")
                     Text("Fat: \(format(food.macros.fat))g")
                     Text("Protein: \(format(food.macros.proteins))g")

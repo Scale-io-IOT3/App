@@ -12,6 +12,8 @@ class FoodService {
     @MainActor
     public func fetchFoods(request: APIRequest) async throws -> [Food] {
         let response = try await get(request)
+        
+        print(response)
         return response.foods
     }
 }
