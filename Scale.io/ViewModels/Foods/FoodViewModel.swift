@@ -14,7 +14,6 @@ class FoodViewModel: ObservableObject {
         return await fetch(type: .product, food: food, grams: quantity)
     }
 
-    @MainActor
     private func fetch(type: FoodType, food: String, grams: Double) async -> [Food] {
         let request = type.makeRequest(food: food, grams: grams)
         

@@ -8,9 +8,12 @@ enum HTTPError: Error {
     case unknownError(Error)
 }
 
-class APIClient {
+struct EmptyBody: Encodable {}
+
+
+class BaseClient {
     private let baseURL = "http://localhost:5175/"
-    static let shared = APIClient()
+    static let shared = BaseClient()
 
     private init() {}
 
@@ -22,6 +25,28 @@ class APIClient {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let (data, response) = try await URLSession.shared.data(for: request)
+
+        try validate(response: response)
+
+        return try decode(data: data)
+    }
+
+    func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil)async throws -> U {
+        let urlString = baseURL + endpoint
+
+        guard let url = URL(string: urlString) else {
+            throw HTTPError.invalidURL
+        }
+
+        var _request = URLRequest(url: url)
+        _request.httpMethod = "POST"
+        _request.addToken()
+
+        let body = try encode(body: request ?? EmptyBody() as! T)
+
+        _request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: _request)
 
         try validate(response: response)
 
@@ -59,5 +84,13 @@ class APIClient {
         } catch {
             throw HTTPError.invalidData
         }
+    }
+}
+
+extension URLRequest {
+    mutating func addToken() {
+        let token = TokenHandler.shared.retrieveToken()
+        addValue("application/json", forHTTPHeaderField: "Content-Type")
+        addValue("Bearer \(String(describing: token))", forHTTPHeaderField: "Authorization")
     }
 }

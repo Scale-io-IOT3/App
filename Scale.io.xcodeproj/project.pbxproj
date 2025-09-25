@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		66B8EA202E84BB2A0007FF0D /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 66B8EA1F2E84BB2A0007FF0D /* JWTDecode */; };
+		66B8EA262E84BBAB0007FF0D /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 66B8EA252E84BBAB0007FF0D /* KeychainAccess */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		66A68BF02E801BD8004ACA0D /* Scale.io.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scale.io.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				66B8EA262E84BBAB0007FF0D /* KeychainAccess in Frameworks */,
+				66B8EA202E84BB2A0007FF0D /* JWTDecode in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = Scale.io;
 			packageProductDependencies = (
+				66B8EA1F2E84BB2A0007FF0D /* JWTDecode */,
+				66B8EA252E84BBAB0007FF0D /* KeychainAccess */,
 			);
 			productName = Scale.io;
 			productReference = 66A68BF02E801BD8004ACA0D /* Scale.io.app */;
@@ -94,6 +103,10 @@
 			);
 			mainGroup = 66A68BE72E801BD8004ACA0D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				66B8EA1E2E84BB2A0007FF0D /* XCRemoteSwiftPackageReference "JWTDecode" */,
+				66B8EA242E84BBAB0007FF0D /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 66A68BF12E801BD8004ACA0D /* Products */;
 			projectDirPath = "";
@@ -330,6 +343,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		66B8EA1E2E84BB2A0007FF0D /* XCRemoteSwiftPackageReference "JWTDecode" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/auth0/JWTDecode.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
+		66B8EA242E84BBAB0007FF0D /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		66B8EA1F2E84BB2A0007FF0D /* JWTDecode */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 66B8EA1E2E84BB2A0007FF0D /* XCRemoteSwiftPackageReference "JWTDecode" */;
+			productName = JWTDecode;
+		};
+		66B8EA252E84BBAB0007FF0D /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 66B8EA242E84BBAB0007FF0D /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 66A68BE82E801BD8004ACA0D /* Project object */;
 }
