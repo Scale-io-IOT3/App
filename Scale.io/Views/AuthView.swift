@@ -1,8 +1,55 @@
 import SwiftUI
 
 struct AuthView: View {
-    var body: some View{
-        Text("Auth")
+    @State var username: String = ""
+    @State var password: String = ""
+    @EnvironmentObject var auth: AuthViewModel
+    @State var showError: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Let's sign you in.")
+                    .font(.title)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.accent)
+
+                Text("You have been missed")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom)
+
+            VStack(spacing: 20) {
+                UsernameField(name: "Username", value: $username)
+                PasswordField(name: "Password", value: $password)
+            }
+            .padding(.bottom, 12)
+
+            Button {
+                Task {
+                    await auth.login(username: username, password: password)
+                    showError = !auth.connected
+                }
+            } label: {
+                Text("Sign in")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .foregroundStyle(.white)
+                    .fontWeight(.semibold)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.accent)
+            )
+        }
+        .padding(.horizontal)
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Something went wrong")
+        }
     }
 }
 
