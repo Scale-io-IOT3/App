@@ -10,7 +10,6 @@ enum HTTPError: Error {
 
 struct EmptyBody: Encodable {}
 
-
 class BaseClient {
     private let baseURL = "http://localhost:5175/"
     static let shared = BaseClient()
@@ -24,6 +23,7 @@ class BaseClient {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.addToken()
         let (data, response) = try await URLSession.shared.data(for: request)
 
         try validate(response: response)
@@ -31,7 +31,7 @@ class BaseClient {
         return try decode(data: data)
     }
 
-    func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil)async throws -> U {
+    func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil, debug: Bool = false) async throws -> U {
         let urlString = baseURL + endpoint
 
         guard let url = URL(string: urlString) else {
@@ -43,8 +43,11 @@ class BaseClient {
         _request.addToken()
 
         let body = try encode(body: request ?? EmptyBody() as! T)
-
         _request.httpBody = body
+        
+        if debug {
+            self.debug(request: _request)
+        }
 
         let (data, response) = try await URLSession.shared.data(for: _request)
 
@@ -85,12 +88,24 @@ class BaseClient {
             throw HTTPError.invalidData
         }
     }
+    
+    private func debug(request: URLRequest){
+        if let json = String(
+            data: request.httpBody ?? Data(),
+            encoding: .utf8
+        ) {
+            print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
+            print("➡️ Body: \(json)")
+        }
+    }
 }
 
 extension URLRequest {
     mutating func addToken() {
-        let token = TokenHandler.shared.access()
-        addValue("application/json", forHTTPHeaderField: "Content-Type")
-        addValue("Bearer \(String(describing: token))", forHTTPHeaderField: "Authorization")
+        setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let token = TokenHandler.shared.getAccessToken() else {
+            return
+        }
+        setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
 }

@@ -3,8 +3,8 @@ import Foundation
 class AuthService {
     private let client = AuthClient.shared
 
-    public func login(username: String, password: String) async throws -> LoginResponse {
+    public func login(username: String, password: String) async throws -> AuthResponse {
         let request = AuthRequest(username: username, password: password)
-        return try await client.login(request: request) as LoginResponse
+        return try await client.login(request: request)
     }
 }

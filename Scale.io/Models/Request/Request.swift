@@ -1,5 +1,5 @@
 import Foundation
 
-protocol Request: Encodable {
+protocol Request: Codable {
     var endpoint: String { get }
 }

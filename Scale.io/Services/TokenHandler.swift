@@ -11,10 +11,10 @@ class TokenHandler {
 
     private init() {}
 
-    func save(token: AuthResponse) {
+    func save(_ token: AuthResponse) {
         do {
-            try keychain.set(token.refresh, key: refreshKey)
-            accessToken = token.access
+            try keychain.set(token.refreshToken, key: refreshKey)
+            accessToken = token.accessToken
         } catch {
             print("Failed to save token: \(error)")
         }
