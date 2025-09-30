@@ -23,7 +23,7 @@ class BaseClient {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.addToken()
+        await request.addToken()
         let (data, response) = try await URLSession.shared.data(for: request)
 
         try validate(response: response)
@@ -31,7 +31,7 @@ class BaseClient {
         return try decode(data: data)
     }
 
-    func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil, debug: Bool = false) async throws -> U {
+    func post<T: Encodable, U: Decodable>(endpoint: String,request: T? = nil,debug: Bool = false,withAuth: Bool = true) async throws -> U {
         let urlString = baseURL + endpoint
 
         guard let url = URL(string: urlString) else {
@@ -40,11 +40,16 @@ class BaseClient {
 
         var _request = URLRequest(url: url)
         _request.httpMethod = "POST"
-        _request.addToken()
+
+        if withAuth {
+            await _request.addToken()
+        } else {
+            _request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
 
         let body = try encode(body: request ?? EmptyBody() as! T)
         _request.httpBody = body
-        
+
         if debug {
             self.debug(request: _request)
         }
@@ -88,8 +93,8 @@ class BaseClient {
             throw HTTPError.invalidData
         }
     }
-    
-    private func debug(request: URLRequest){
+
+    private func debug(request: URLRequest) {
         if let json = String(
             data: request.httpBody ?? Data(),
             encoding: .utf8
@@ -101,9 +106,9 @@ class BaseClient {
 }
 
 extension URLRequest {
-    mutating func addToken() {
+    mutating func addToken() async {
         setValue("application/json", forHTTPHeaderField: "Content-Type")
-        guard let token = TokenHandler.shared.getAccessToken() else {
+        guard let token = await TokenHandler.shared.get() else {
             return
         }
         setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

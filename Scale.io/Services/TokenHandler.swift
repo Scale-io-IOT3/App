@@ -2,7 +2,7 @@ import Foundation
 import JWTDecode
 import KeychainAccess
 
-class TokenHandler {
+actor TokenHandler {
     private let refreshKey = "refresh_token"
     private let keychain = Keychain(service: "Scale.grp.Scale-io")
 
@@ -29,26 +29,47 @@ class TokenHandler {
         }
     }
 
-    func getAccessToken() -> String? {
-        if let access = accessToken {
-            return validate(access)
+    func get() async -> String? {
+        if let token = accessToken, validate(token) {
+            return token
         }
 
-        return nil
+        guard let refreshed = await refresh() else {
+            return nil
+        }
+
+        return refreshed
     }
 
-    func getRefreshToken() -> String? {
+    private func getRefreshToken() -> String? {
         return try? keychain.get(refreshKey)
     }
 
-    private func validate(_ token: String?) -> String? {
-        guard let token else { return nil }
+    private func validate(_ token: String?) -> Bool {
+        guard let token else { return false }
 
         do {
             let jwt = try decode(jwt: token)
-            return jwt.expired ? nil : token
+            return !jwt.expired
         } catch {
             print("Invalid token: \(error)")
+            return false
+        }
+    }
+
+    private func refresh() async -> String? {
+        guard let token = getRefreshToken() else {
+            clear()
+            return nil
+        }
+
+        do {
+            let res = try await AuthClient.shared.refresh(token: token)
+            save(res)
+            return res.accessToken
+        } catch {
+            print("Refresh failed: \(error)")
+            clear()
             return nil
         }
     }
