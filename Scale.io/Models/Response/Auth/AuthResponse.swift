@@ -1,7 +1,4 @@
-import Foundation
-
-struct AuthResponse: Codable {
-    let username, accessToken: String
-    let expiresIn: Int
+protocol AuthResponse: Codable  {
+    var access: String {get set}
+    var refresh: String { get set }
 }
-

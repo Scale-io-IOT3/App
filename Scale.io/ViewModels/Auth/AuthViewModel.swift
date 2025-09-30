@@ -13,4 +13,8 @@ class AuthViewModel: ObservableObject {
 
         token.saveToken(token: response.accessToken)
     }
+    
+    public func refresh() async {
+        
+    }
 }

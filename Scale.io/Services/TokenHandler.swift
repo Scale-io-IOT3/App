@@ -3,51 +3,53 @@ import JWTDecode
 import KeychainAccess
 
 class TokenHandler {
-    let key = Keychain(service: "Scale.grp.Scale-io")
+    private let refreshKey = "refresh_token"
+    private let keychain = Keychain(service: "Scale.grp.Scale-io")
+
+    private var accessToken: String?
     public static let shared = TokenHandler()
-    
+
     private init() {}
-    
-    
-    func saveToken(token: String) {
+
+    func save(token: AuthResponse) {
         do {
-            try key.set(token, key: "jwt_token")
+            try keychain.set(token.refresh, key: refreshKey)
+            accessToken = token.access
         } catch {
-            print("Failed to save token")
-        }
-    }
-    
-    func clearToken() {
-        do {
-            try key.remove("jwt_token")
-        } catch {
-            print("Failed to clear token")
-        }
-    }
-    
-    func retrieveToken() -> String? {
-        do {
-            return try key.get("jwt_token")
-        } catch {
-            print("Unable to retrieve token")
-        }
-        return nil
-    }
-    
-    func isTokenExpired() -> Bool {
-        guard let token = retrieveToken() else {
-            return true
-        }
-        
-        do {
-            let jwt = try decode(jwt: token)
-            guard let exp = jwt.expiresAt else {
-                return true
-            }
-            return exp <= Date()
-        } catch {
-            return true
+            print("Failed to save token: \(error)")
         }
     }
 
+    func clear() {
+        do {
+            try keychain.remove(refreshKey)
+            accessToken = nil
+        } catch {
+            print("Failed to clear tokens: \(error)")
+        }
+    }
+
+    func getAccessToken() -> String? {
+        if let access = accessToken {
+            return validate(access)
+        }
+
+        return nil
+    }
+
+    func getRefreshToken() -> String? {
+        return try? keychain.get(refreshKey)
+    }
+
+    private func validate(_ token: String?) -> String? {
+        guard let token else { return nil }
+
+        do {
+            let jwt = try decode(jwt: token)
+            return jwt.expired ? nil : token
+        } catch {
+            print("Invalid token: \(error)")
+            return nil
+        }
+    }
 }

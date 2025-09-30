@@ -89,7 +89,7 @@ class BaseClient {
 
 extension URLRequest {
     mutating func addToken() {
-        let token = TokenHandler.shared.retrieveToken()
+        let token = TokenHandler.shared.access()
         addValue("application/json", forHTTPHeaderField: "Content-Type")
         addValue("Bearer \(String(describing: token))", forHTTPHeaderField: "Authorization")
     }
