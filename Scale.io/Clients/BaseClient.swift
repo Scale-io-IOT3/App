@@ -11,7 +11,7 @@ enum HTTPError: Error {
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-    private let baseURL = "http://192.168.0.17:5175/"
+    private let baseURL = "http://10.3.3.40:5175/"
     static let shared = BaseClient()
 
     private init() {}
@@ -95,10 +95,7 @@ class BaseClient {
     }
 
     private func debug(request: URLRequest) {
-        if let json = String(
-            data: request.httpBody ?? Data(),
-            encoding: .utf8
-        ) {
+        if let json = String(data: request.httpBody ?? Data(),encoding: .utf8) {
             print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
             print("➡️ Body: \(json)")
         }

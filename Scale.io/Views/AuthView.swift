@@ -30,7 +30,7 @@ struct AuthView: View {
             Button {
                 Task {
                     await auth.login(username: username, password: password)
-                    showError = !auth.connected
+                    showError = !auth.isAuth()
                 }
             } label: {
                 Text("Sign in")

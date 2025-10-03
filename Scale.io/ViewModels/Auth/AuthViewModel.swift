@@ -3,32 +3,51 @@ internal import Combine
 
 @MainActor
 class AuthViewModel: ObservableObject {
-    @Published var connected: Bool = false
+    enum AppState {
+        case loading
+        case authenticated
+        case unauthenticated
+    }
+    
+    @Published private(set) var state: AppState = .loading
     @Published var error: String?
     
     private let service = AuthService()
-    private let handler = TokenHandler.shared
+    private let token = TokenHandler.shared
     
     init() {
-        Task {
-            connected = await handler.get() != nil
+        Task { await refreshSession() }
+    }
+    
+    func refreshSession() async {
+        state = .loading
+        if let _ = await token.get() {
+            state = .authenticated
+        } else {
+            state = .unauthenticated
+            error = "Session expired. Please log in."
         }
     }
     
     func login(username: String, password: String) async {
+        state = .loading
         do {
-            let response = try await service.login(username: username, password: password)
-            await handler.save(response)
-            connected = true
+            let tokens = try await service.login(username: username, password: password)
+            await token.save(tokens)
+            state = .authenticated
             error = nil
         } catch {
-            connected = false
+            state = .unauthenticated
             self.error = "Login failed. Please check your credentials."
         }
     }
     
     func logout() async {
-        await handler.clear()
-        connected = false
+        await token.clear()
+        state = .unauthenticated
+    }
+    
+    func isAuth()-> Bool{
+        return state == .unauthenticated
     }
 }

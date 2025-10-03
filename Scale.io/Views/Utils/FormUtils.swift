@@ -51,6 +51,7 @@ struct IconTextField: View {
             .autocorrectionDisabled(true)
             .textInputAutocapitalization(.never)
             .submitLabel(.done)
+            .fontWeight(.semibold)
             
             if isSecure {
                 Button {

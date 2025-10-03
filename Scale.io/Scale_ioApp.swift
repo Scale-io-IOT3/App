@@ -13,19 +13,24 @@ struct Scale_ioApp: App {
 }
 
 // MARK: - Switcher
-
 struct AppSwitcher: View {
     @EnvironmentObject var auth: AuthViewModel
-
+    
     var body: some View {
         ZStack {
-            if auth.connected {
+            switch auth.state {
+            case .loading:
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                
+            case .authenticated:
                 ContentView()
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
-            } else {
+                
+            case .unauthenticated:
                 AuthView()
                     .transition(.asymmetric(
                         insertion: .move(edge: .leading).combined(with: .opacity),
@@ -33,6 +38,8 @@ struct AppSwitcher: View {
                     ))
             }
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: auth.connected)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8),
+                   value: auth.state)
     }
 }
+
