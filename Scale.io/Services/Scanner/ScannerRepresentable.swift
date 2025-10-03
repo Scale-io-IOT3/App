@@ -1,15 +1,25 @@
 import SwiftUI
 import UIKit
+internal import AVFoundation
 
 struct ScannerRepresentable: UIViewControllerRepresentable {
-    typealias UIViewControllerType = ScannerViewController
+    @Binding var startScanning: Bool
     var onCodeFound: (String) -> Void
-
+    
     func makeUIViewController(context: Context) -> ScannerViewController {
-        let controller = ScannerViewController()
-        controller.onCodeFound = onCodeFound
-        return controller
+        let scanner = ScannerViewController()
+        scanner.onCodeFound = { code in
+            onCodeFound(code)
+            startScanning = false
+        }
+        return scanner
     }
-
-    func updateUIViewController(_ uiViewController: ScannerViewController, context: Context) {}
+    
+    func updateUIViewController(_ uiViewController: ScannerViewController, context: Context) {
+        if startScanning {
+            uiViewController.sessionQueue.async {
+                uiViewController.session?.startRunning()
+            }
+        }
+    }
 }
