@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MainScreen: View {
-    @State private var selected: Tab = .foods
+    @State private var selected: Tab = .add
     var body: some View {
         TabView(selection: $selected) {
             ForEach(Tab.allCases, id: \.self) { tab in
@@ -9,4 +9,8 @@ struct MainScreen: View {
             }
         }
     }
+}
+
+#Preview {
+    MainScreen()
 }

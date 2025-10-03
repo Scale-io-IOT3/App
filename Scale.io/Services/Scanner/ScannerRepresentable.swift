@@ -4,12 +4,12 @@ internal import AVFoundation
 
 struct ScannerRepresentable: UIViewControllerRepresentable {
     @Binding var startScanning: Bool
-    var onCodeFound: (String) -> Void
+    var onCodeFound: (String) async -> Void
     
     func makeUIViewController(context: Context) -> ScannerViewController {
         let scanner = ScannerViewController()
         scanner.onCodeFound = { code in
-            onCodeFound(code)
+            Task { await onCodeFound(code) }
             startScanning = false
         }
         return scanner
