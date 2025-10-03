@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddFood: View {
     @State private var selectedMode: EntryMode = .search
-    @StateObject private var foodVm = FoodViewModel()
+    @ObservedObject private var foodVm = FoodViewModel()
     @State private var foods: [Food] = []
     @State private var isLoading: Bool = false
     @State private var presentSheet: Bool = false
