@@ -22,7 +22,6 @@ struct SearchView: View {
             }
             .searchable(text: $search)
             .task(id: search) { await searchTask() }
-            .navigationTitle("Foods")
     }
 
     private func searchTask() async {

@@ -37,7 +37,6 @@ struct FoodListView: View {
             }
             .padding(.vertical, 4)
         }
-        .navigationTitle("Foods")
     }
 
     private func format(_ value: Double) -> String {

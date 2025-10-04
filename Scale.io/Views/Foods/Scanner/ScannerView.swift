@@ -11,6 +11,5 @@ struct ScannerView: View {
             foods = await fetch(code)
             presentSheet = true
         })
-        .navigationTitle("Scanner")
     }
 }

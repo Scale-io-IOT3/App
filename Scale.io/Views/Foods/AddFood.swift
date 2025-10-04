@@ -8,9 +8,9 @@ struct AddFood: View {
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
 
-    enum EntryMode: String, CaseIterable {
-        case search = "Search"
-        case scan = "Scan"
+    private enum EntryMode: String, CaseIterable {
+        case search
+        case scan
     }
 
     var body: some View {
@@ -18,7 +18,7 @@ struct AddFood: View {
             VStack {
                 Picker("Mode", selection: $selectedMode) {
                     ForEach(EntryMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
+                        Text(mode.rawValue.capitalized).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -26,6 +26,7 @@ struct AddFood: View {
 
                 contentView
                     .environmentObject(foodVm)
+                    .navigationTitle(selectedMode.rawValue.capitalized)
             }
         }
         .sheet(isPresented: $presentSheet, onDismiss: { startScanning = true }) {

@@ -11,7 +11,7 @@ enum HTTPError: Error {
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-    private let baseURL = "http://10.3.3.40:5175/"
+    private let baseURL = "http://192.168.0.17:5175/"
     static let shared = BaseClient()
 
     private init() {}
