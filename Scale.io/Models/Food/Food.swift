@@ -1,6 +1,6 @@
 import Foundation
 
-struct Food: Codable, Identifiable{
+struct Food: Codable, Identifiable, Equatable{
     var id : UUID = .init()
     let name, brands: String
     let calories: Int

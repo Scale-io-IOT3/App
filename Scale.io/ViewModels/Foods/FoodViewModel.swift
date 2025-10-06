@@ -3,6 +3,7 @@ internal import Combine
 
 class FoodViewModel: ObservableObject {
     @Published private(set) var foods: [Food] = []
+    @Published public var selected: Food? = nil
     private let service = FoodService()
 
 

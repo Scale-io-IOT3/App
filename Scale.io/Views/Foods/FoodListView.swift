@@ -1,48 +1,79 @@
 import SwiftUI
 
 struct FoodListView: View {
+    @EnvironmentObject var foodVm: FoodViewModel
     @Binding var foods: [Food]
+    @Binding var presentSheet: Bool
+    
     var body: some View {
-        List(foods) { food in
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text(food.name)
-                        .font(.headline)
-
-                    Spacer()
-
-                    Text(food.brands)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        List {
+            ForEach(foods) { food in
+                Button {
+                    foodVm.selected = food
+                    presentSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(food.name)
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            
+                            Text(food.brands)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
                 }
-                .lineLimit(1)
-                .truncationMode(.tail)
-
-                HStack(spacing: 12) {
-                    Text("Calories: \(food.calories)")
-                    Text("Carbs: \(format(food.macros.carbohydrates))g")
-                    Text("Fat: \(format(food.macros.fat))g")
-                    Text("Protein: \(format(food.macros.proteins))g")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-                HStack(spacing: 12) {
-                    Text("C \(format(food.macros.percentages.carbs))%")
-                    Text("F \(format(food.macros.percentages.fat))%")
-                    Text("P \(format(food.macros.percentages.proteins))%")
-                }
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .buttonStyle(.plain)
+                .listRowSeparator(.automatic)
             }
-            .padding(.vertical, 4)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
+        .animation(.smooth, value: foods)
     }
+}
 
-    private func format(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.maximumFractionDigits = 1
-        formatter.minimumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
-    }
+#Preview {
+    FoodListView(
+        foods: .constant([
+            Food(
+                name: "Banana",
+                brands: "Monke",
+                calories: 120,
+                quantity: 1,
+                macros: Macros(
+                    carbohydrates: 27,
+                    fat: 0.3,
+                    proteins: 1.3,
+                    percentages: Percentages(carbs: 93, fat: 2, proteins: 5)
+                )
+            ),
+            Food(
+                name: "Chicken Breast",
+                brands: "Farm Fresh",
+                calories: 165,
+                quantity: 1,
+                macros: Macros(
+                    carbohydrates: 0,
+                    fat: 3.6,
+                    proteins: 31,
+                    percentages: Percentages(carbs: 0, fat: 22, proteins: 78)
+                )
+            )
+        ]),
+        presentSheet: .constant(false)
+    )
+    .environmentObject(FoodViewModel())
 }

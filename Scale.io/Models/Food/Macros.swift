@@ -1,10 +1,10 @@
 import Foundation
 
-struct Macros: Codable {
+struct Macros: Codable, Equatable {
     let carbohydrates, fat, proteins: Double
     let percentages: Percentages
 }
 
-struct Percentages: Codable {
+struct Percentages: Codable, Equatable {
     let carbs, fat, proteins: Double
 }

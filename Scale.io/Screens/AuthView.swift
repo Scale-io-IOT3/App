@@ -26,23 +26,13 @@ struct AuthView: View {
                 PasswordField(name: "Password", value: $password)
             }
             .padding(.bottom, 12)
-
-            Button {
+            
+            CustomButton(text: "Sign In",action: {
                 Task {
                     await auth.login(username: username, password: password)
                     showError = !auth.isAuth()
                 }
-            } label: {
-                Text("Sign in")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .foregroundStyle(.white)
-                    .fontWeight(.semibold)
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.accent)
-            )
+            })
         }
         .padding(.horizontal)
         .alert("Error", isPresented: $showError) {
