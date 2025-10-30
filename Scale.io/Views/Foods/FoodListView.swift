@@ -12,37 +12,43 @@ struct FoodListView: View {
           foodVm.selected = food
           presentSheet = true
         } label: {
-          HStack {
-            VStack(alignment: .leading, spacing: 4) {
-              Text(food.name)
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-
-              Text(food.brands)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-
-            }
-
-            Spacer()
-            Image(systemName: "chevron.right")
-              .font(.system(size: 13, weight: .semibold))
-              .foregroundStyle(.tertiary)
-          }
-          .padding(.vertical, 10)
-          .contentShape(Rectangle())
+          FoodRowView(food: food)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .listRowSeparator(.automatic)
       }
     }
-    .scrollDismissesKeyboard(.interactively)
+    .scrollDismissesKeyboard(.immediately)
     .listStyle(.plain)
-    .scrollContentBackground(.hidden)
-    .background(Color(.systemGroupedBackground))
-    .animation(.smooth, value: foods)
+    .animation(.easeIn, value: foods)
+  }
+}
+
+struct FoodRowView: View {
+  let food: Food
+
+  var body: some View {
+    HStack {
+      VStack(alignment: .leading, spacing: 4) {
+        Text(food.name)
+          .font(.headline)
+          .fontWeight(.semibold)
+          .foregroundStyle(.primary)
+          .lineLimit(1)
+
+        Text(food.brands)
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+      }
+
+      Spacer()
+
+      Image(systemName: "chevron.right")
+        .font(.system(size: 13, weight: .semibold))
+        .foregroundStyle(.tertiary)
+    }
   }
 }

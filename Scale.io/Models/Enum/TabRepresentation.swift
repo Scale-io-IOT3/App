@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-enum Tab: String, CaseIterable, Hashable {
+enum TabRepresentation: String, CaseIterable, Hashable {
   case dashboard
   case add
   case scale
@@ -15,7 +15,7 @@ enum Tab: String, CaseIterable, Hashable {
   }
 
   @ViewBuilder
-  private var content: some View {
+  var content: some View {
     switch self {
     case .add:
       AddFood()

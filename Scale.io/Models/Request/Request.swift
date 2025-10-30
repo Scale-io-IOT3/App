@@ -1,5 +1,5 @@
 import Foundation
 
 protocol Request: Codable {
-    var endpoint: String { get }
+  var endpoint: String { get }
 }

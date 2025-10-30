@@ -8,7 +8,6 @@ struct AddFood: View {
   @State private var presentSheet: Bool = false
   @State private var startScanning: Bool = true
   @State private var searchText: String = ""
-
   private enum EntryMode: String, CaseIterable {
     case search
     case scan
@@ -16,28 +15,37 @@ struct AddFood: View {
 
   var body: some View {
     NavigationStack {
-      VStack {
-        Picker("Mode", selection: $selectedMode) {
-          ForEach(EntryMode.allCases, id: \.self) { mode in
-            Text(mode.rawValue.capitalized).tag(mode)
-          }
-        }
-        .pickerStyle(.segmented)
-        .padding()
-        .onChange(of: selectedMode) {
-          resetState(for: selectedMode)
-        }
-
+      ZStack {
         contentView
           .environmentObject(foodVm)
           .navigationTitle(selectedMode.rawValue.capitalized)
+
+        VStack {
+          if foods.isEmpty {
+            Picker("Mode", selection: $selectedMode) {
+              ForEach(EntryMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue.capitalized).tag(mode)
+              }
+            }
+            .glassEffect(.regular)
+            .pickerStyle(.segmented)
+            .padding(.vertical)
+            .padding(.horizontal, 52)
+            .onChange(of: selectedMode) {
+              resetState(for: selectedMode)
+            }
+          }
+          Spacer()
+        }
       }
     }
-    .sheet(isPresented: $presentSheet, onDismiss: { startScanning = true }) {
-      if let selected = foodVm.selected {
-        FoodDetailsView(food: selected)
-          .presentationDetents([.fraction(0.48)])
+    .sheet(
+      isPresented: $presentSheet,
+      onDismiss: {
+        resetState(for: selectedMode)
       }
+    ) {
+      FoodDetailsView(food: foodVm.selected).presentationDetents([.fraction(0.48)])
     }
   }
 
@@ -62,13 +70,12 @@ struct AddFood: View {
       }
 
     case .scan:
-      ScannerView(
-        foods: $foods,
-        presentSheet: $presentSheet,
-        startScanning: $startScanning
-      ) { query in
+      ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) {
+        query in
         await foodVm.getProduct(food: query)
       }
+      .environment(\.colorScheme, .dark)
+      .ignoresSafeArea()
     }
   }
 }

@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct MainScreen: View {
-  @State private var selected: Tab = .dashboard
+  @State private var selected: TabRepresentation = .dashboard
   var body: some View {
     TabView(selection: $selected) {
-      ForEach(Tab.allCases, id: \.self) { tab in
+      ForEach(TabRepresentation.allCases, id: \.self) { tab in
         tab.view
       }
     }
+    .tabViewStyle(.sidebarAdaptable)
   }
 }
 
