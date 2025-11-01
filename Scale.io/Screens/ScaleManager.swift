@@ -2,20 +2,24 @@ import SwiftUI
 
 struct ScaleManager: View {
   var body: some View {
-    VStack(spacing: 40) {
-
-      Spacer()
-
-      WeightView()
-      ScaleControlsView()
-
-      Spacer()
-
-      ScaleConnectionState()
-
+    NavigationStack {
+      VStack(spacing: 40) {
+        Spacer()
+        WeightView()
+        ScaleControlsView()
+        Spacer()
+        ScaleConnectionState()
+      }
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button {
+            print("Test")
+          } label: {
+            Label("Add", systemImage: "plus")
+          }
+        }
+      }
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color(.systemGroupedBackground))
   }
 }
 
@@ -26,7 +30,7 @@ struct WeightView: View {
         .font(.headline)
         .foregroundColor(.secondary)
 
-      Text("0.00 kg")
+      Text("0 g")
         .font(.system(size: 64, weight: .bold, design: .rounded))
         .foregroundColor(.primary)
     }
