@@ -31,7 +31,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     rssi RSSI: NSNumber
   ) {
 
-    guard let uuids = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID], uuids.contains(scaleUUID)
+    guard let UUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID],
+      UUIDs.contains(scaleUUID)
     else { return }
 
     if !scales.contains(where: { $0.identifier == peripheral.identifier }) {
