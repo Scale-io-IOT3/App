@@ -1,113 +1,115 @@
 import Foundation
 
 enum HTTPError: Error {
-    case invalidURL
-    case invalidResponse
-    case invalidData
-    case statusCode(Int)
-    case unknownError(Error)
+  case invalidURL
+  case invalidResponse
+  case invalidData
+  case statusCode(Int)
+  case unknownError(Error)
 }
 
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-    private let baseURL = "https://scale-io-api.fly.dev/"
-    static let shared = BaseClient()
+  private let baseURL: String = Secrets.API
+  static let shared = BaseClient()
 
-    private init() {}
+  private init() {}
 
-    func get<T: Decodable>(endpoint: String) async throws -> T {
-        guard let url = URL(string: baseURL + endpoint) else {
-            throw HTTPError.invalidURL
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        await request.addToken()
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        try validate(response: response)
-
-        return try decode(data: data)
+  func get<T: Decodable>(endpoint: String) async throws -> T {
+    guard let url = URL(string: baseURL + endpoint) else {
+      throw HTTPError.invalidURL
     }
 
-    func post<T: Encodable, U: Decodable>(endpoint: String,request: T? = nil,debug: Bool = false,withAuth: Bool = true) async throws -> U {
-        let urlString = baseURL + endpoint
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    await request.addToken()
+    let (data, response) = try await URLSession.shared.data(for: request)
 
-        guard let url = URL(string: urlString) else {
-            throw HTTPError.invalidURL
-        }
+    try validate(response: response)
 
-        var _request = URLRequest(url: url)
-        _request.httpMethod = "POST"
+    return try decode(data: data)
+  }
 
-        if withAuth {
-            await _request.addToken()
-        } else {
-            _request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        }
+  func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil, debug: Bool = false, withAuth: Bool = true)
+    async throws -> U
+  {
+    let urlString = baseURL + endpoint
 
-        let body = try encode(body: request ?? EmptyBody() as! T)
-        _request.httpBody = body
-
-        if debug {
-            self.debug(request: _request)
-        }
-
-        let (data, response) = try await URLSession.shared.data(for: _request)
-
-        try validate(response: response)
-
-        return try decode(data: data)
+    guard let url = URL(string: urlString) else {
+      throw HTTPError.invalidURL
     }
 
-    private func validate(response: URLResponse) throws {
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw HTTPError.invalidResponse
-        }
+    var _request = URLRequest(url: url)
+    _request.httpMethod = "POST"
 
-        guard (200 ... 299).contains(httpResponse.statusCode) else {
-            print("HTTP Error: \(httpResponse.statusCode)")
-            throw HTTPError.statusCode(httpResponse.statusCode)
-        }
+    if withAuth {
+      await _request.addToken()
+    } else {
+      _request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     }
 
-    private func decode<T: Decodable>(data: Data) throws -> T {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
+    let body = try encode(body: request ?? EmptyBody() as! T)
+    _request.httpBody = body
 
-        do {
-            return try decoder.decode(T.self, from: data)
-        } catch {
-            throw HTTPError.invalidData
-        }
+    if debug {
+      self.debug(request: _request)
     }
 
-    private func encode<T: Encodable>(body: T) throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
+    let (data, response) = try await URLSession.shared.data(for: _request)
 
-        do {
-            return try encoder.encode(body)
-        } catch {
-            throw HTTPError.invalidData
-        }
+    try validate(response: response)
+
+    return try decode(data: data)
+  }
+
+  private func validate(response: URLResponse) throws {
+    guard let httpResponse = response as? HTTPURLResponse else {
+      throw HTTPError.invalidResponse
     }
 
-    private func debug(request: URLRequest) {
-        if let json = String(data: request.httpBody ?? Data(),encoding: .utf8) {
-            print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
-            print("➡️ Body: \(json)")
-        }
+    guard (200...299).contains(httpResponse.statusCode) else {
+      print("HTTP Error: \(httpResponse.statusCode)")
+      throw HTTPError.statusCode(httpResponse.statusCode)
     }
+  }
+
+  private func decode<T: Decodable>(data: Data) throws -> T {
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+    do {
+      return try decoder.decode(T.self, from: data)
+    } catch {
+      throw HTTPError.invalidData
+    }
+  }
+
+  private func encode<T: Encodable>(body: T) throws -> Data {
+    let encoder = JSONEncoder()
+    encoder.keyEncodingStrategy = .convertToSnakeCase
+
+    do {
+      return try encoder.encode(body)
+    } catch {
+      throw HTTPError.invalidData
+    }
+  }
+
+  private func debug(request: URLRequest) {
+    if let json = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+      print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
+      print("➡️ Body: \(json)")
+    }
+  }
 }
 
 extension URLRequest {
-    mutating func addToken() async {
-        setValue("application/json", forHTTPHeaderField: "Content-Type")
-        guard let token = await TokenHandler.shared.get() else {
-            return
-        }
-        setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+  mutating func addToken() async {
+    setValue("application/json", forHTTPHeaderField: "Content-Type")
+    guard let token = await TokenHandler.shared.get() else {
+      return
     }
+    setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+  }
 }

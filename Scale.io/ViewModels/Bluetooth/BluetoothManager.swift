@@ -1,10 +1,3 @@
-//
-//  BluetoothManager.swift
-//  Scale.io
-//
-//  Created by hater__ on 2025-11-01.
-//
-
 internal import Combine
 import CoreBluetooth
 
@@ -12,6 +5,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
   @Published var enabled = true
   @Published var scales: [CBPeripheral] = []
   static let shared = BluetoothManager()
+  private let scaleUUID = CBUUID(string: Secrets.SCALE_UUID)
 
   private var centralManager: CBCentralManager!
 
@@ -36,20 +30,14 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     advertisementData: [String: Any],
     rssi RSSI: NSNumber
   ) {
-    guard isScale(peripheral: peripheral) else { return }
+
+    guard let uuids = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID], uuids.contains(scaleUUID)
+    else { return }
 
     if !scales.contains(where: { $0.identifier == peripheral.identifier }) {
       scales.append(peripheral)
-      print("Discovered scale:", peripheral.name ?? "Unknown")
+      print("Found scale:", peripheral.name ?? "Scale")
     }
   }
 
-  private func isScale(peripheral: CBPeripheral) -> Bool {
-    if let name = peripheral.name {
-      return name.lowercased().contains("scale")
-    }
-
-    return false
-
-  }
 }
