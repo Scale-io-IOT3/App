@@ -20,7 +20,7 @@ enum TabRepresentation: String, CaseIterable, Hashable {
     case .add:
       AddFood()
     case .scale:
-      Text("Scale")
+      ScaleManager()
     case .dashboard:
       Text("Dash")
     }

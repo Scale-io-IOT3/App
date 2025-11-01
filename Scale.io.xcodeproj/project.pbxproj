@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		66B126EF2EB64D3700E55906 /* Scale-io-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 66B126EE2EB64D3700E55906 /* Scale-io-Info.plist */; };
 		66B8EA202E84BB2A0007FF0D /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 66B8EA1F2E84BB2A0007FF0D /* JWTDecode */; };
 		66B8EA262E84BBAB0007FF0D /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 66B8EA252E84BBAB0007FF0D /* KeychainAccess */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		66A68BF02E801BD8004ACA0D /* Scale.io.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scale.io.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		66B126EE2EB64D3700E55906 /* Scale-io-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Scale-io-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +41,7 @@
 		66A68BE72E801BD8004ACA0D = {
 			isa = PBXGroup;
 			children = (
+				66B126EE2EB64D3700E55906 /* Scale-io-Info.plist */,
 				66A68BF22E801BD8004ACA0D /* Scale.io */,
 				66A68BF12E801BD8004ACA0D /* Products */,
 			);
@@ -122,6 +125,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				66B126EF2EB64D3700E55906 /* Scale-io-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,8 +271,10 @@
 				DEVELOPMENT_TEAM = H52T5UZ7BR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Scale-io-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Scale.io;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app needs to access bluetooth to connect to your scale";
 				INFOPLIST_KEY_NSCameraUsageDescription = "App needs to access camera for users to scan their barcodes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -303,8 +309,10 @@
 				DEVELOPMENT_TEAM = H52T5UZ7BR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Scale-io-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Scale.io;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app needs to access bluetooth to connect to your scale";
 				INFOPLIST_KEY_NSCameraUsageDescription = "App needs to access camera for users to scan their barcodes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
