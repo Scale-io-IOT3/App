@@ -2,21 +2,21 @@ import SwiftUI
 
 struct ScaleManager: View {
   @StateObject var manager = BluetoothManager.shared
-  
+
   var connected: Bool {
     manager.connectedScale != nil
   }
-  
+
   var body: some View {
     NavigationStack {
       VStack(spacing: 48) {
         Spacer()
-        
+
         WeightView()
         ScaleControlsView()
-        
+
         Spacer()
-        
+
         ScaleConnectionState(connected: connected)
       }
       .toolbar {
@@ -42,7 +42,6 @@ struct WeightView: View {
 
       Text("0 g")
         .font(.system(size: 64, weight: .bold, design: .rounded))
-        .foregroundColor(.accent)
     }
   }
 }
@@ -61,13 +60,13 @@ struct ScaleControlsView: View {
 
 struct ScaleConnectionState: View {
   let connected: Bool
-  
+
   var body: some View {
     VStack(spacing: 4) {
       Text("Battery: 100%")
         .font(.subheadline)
         .foregroundColor(.secondary)
-      
+
       Text(connected ? "Connected" : "Disconnected")
         .font(.footnote)
         .foregroundColor(connected ? .green : .red)
@@ -75,7 +74,6 @@ struct ScaleConnectionState: View {
     .padding(.bottom, 24)
   }
 }
-
 
 #Preview {
   ScaleManager()

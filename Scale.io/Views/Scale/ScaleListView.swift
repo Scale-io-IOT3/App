@@ -36,14 +36,12 @@ private struct ScaleRow: View {
   var body: some View {
     Text(scale.name!)
       .swipeActions(edge: .trailing) {
-        Button {
+        Button(role: .confirm) {
           manager.connect(to: scale)
         } label: {
-          Image(systemName: "link")
-            .symbolRenderingMode(.hierarchical)
-            .foregroundColor(.primary)
+          Label("Connect", systemImage: "link")
         }
-        .tint(.clear)
+        .tint(.accent)
       }
 
   }
