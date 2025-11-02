@@ -1,18 +1,11 @@
-//
-//  ScaleListView.swift
-//  Scale.io
-//
-//  Created by hater__ on 2025-11-01.
-//
-
 import CoreBluetooth
 import SwiftUI
 
 struct ScaleListView: View {
-  @EnvironmentObject var manager: BluetoothManager
+  @EnvironmentObject var vm: BluetoothViewModel
   @ViewBuilder private var view: some View {
-    if !manager.availableScales.isEmpty {
-      List(manager.availableScales, id: \.identifier) { scale in
+    if !vm.availableScales.isEmpty {
+      List(vm.availableScales, id: \.identifier) { scale in
         ScaleRow(scale: scale)
       }
     } else {
@@ -21,25 +14,25 @@ struct ScaleListView: View {
   }
   var body: some View {
     view
-      .environmentObject(manager)
+      .environmentObject(vm)
   }
 }
 
 #Preview {
   ScaleListView()
-    .environmentObject(BluetoothManager.shared)
+    .environmentObject(BluetoothViewModel())
 }
 
 private struct ScaleRow: View {
-  @EnvironmentObject var manager: BluetoothManager
+  @EnvironmentObject var vm: BluetoothViewModel
   let scale: CBPeripheral
   var body: some View {
     Text(scale.name!)
       .swipeActions(edge: .trailing) {
         Button(role: .confirm) {
-          manager.connect(to: scale)
+          vm.connect(to: scale)
         } label: {
-          Label("Connect", systemImage: "link")
+          Image(systemName: "link")
         }
         .tint(.accent)
       }

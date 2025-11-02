@@ -1,13 +1,14 @@
 internal import Combine
 import CoreBluetooth
+import Foundation
 
-class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
-  @Published var enabled = true
-  @Published var availableScales: [CBPeripheral] = []
-  @Published var connectedScale: CBPeripheral?
+class BluetoothManager: NSObject, ObservableObject {
   static let shared = BluetoothManager()
-  private let scaleUUID = CBUUID(string: Secrets.SCALE_UUID)
 
+  @Published private(set) var availableScales: [CBPeripheral] = []
+  @Published private(set) var connectedScale: CBPeripheral?
+
+  private let scaleUUID = CBUUID(string: Secrets.SCALE_UUID)
   private var centralManager: CBCentralManager!
 
   private override init() {
@@ -16,20 +17,22 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
   }
 
   func connect(to scale: CBPeripheral) {
-    if let current = connectedScale {
-      centralManager.cancelPeripheralConnection(current)
-    }
     centralManager.connect(scale)
   }
 
-  func centralManagerDidUpdateState(_ central: CBCentralManager) {
-    if centralManager.state == .poweredOn {
-      enabled = true
-      centralManager.scanForPeripherals(withServices: [scaleUUID])
-      return
-    }
+  func disconnect(from scale: CBPeripheral) {
+    centralManager.cancelPeripheralConnection(scale)
+  }
+}
 
-    enabled = false
+extension BluetoothManager: CBCentralManagerDelegate {
+  func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    if central.state == .poweredOn {
+      central.scanForPeripherals(withServices: [scaleUUID])
+    } else {
+      availableScales.removeAll()
+      connectedScale = nil
+    }
   }
 
   func centralManager(
@@ -38,16 +41,15 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     advertisementData: [String: Any],
     rssi RSSI: NSNumber
   ) {
-
-    if !availableScales.contains(where: { $0.identifier == peripheral.identifier }) {
-      availableScales.append(peripheral)
-      print("Found scale:", peripheral.name ?? "Unknown")
-    }
+    guard !availableScales.contains(where: { $0.identifier == peripheral.identifier }) else { return }
+    availableScales.append(peripheral)
+    print("Found scale:", peripheral.name ?? "Unknown")
   }
 
   func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
     connectedScale = peripheral
-    centralManager.stopScan()
+    peripheral.delegate = self
+    central.stopScan()
     print("Connected to:", peripheral.name ?? "Unknown")
   }
 
@@ -55,10 +57,9 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
     if connectedScale?.identifier == peripheral.identifier {
       connectedScale = nil
       print("Disconnected from:", peripheral.name ?? "Unknown")
-
-      centralManager.scanForPeripherals(withServices: [scaleUUID])
-
+      central.scanForPeripherals(withServices: [scaleUUID])
     }
   }
-
 }
+
+extension BluetoothManager: CBPeripheralDelegate {}

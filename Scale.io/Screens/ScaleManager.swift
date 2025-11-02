@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct ScaleManager: View {
-  @StateObject var manager = BluetoothManager.shared
+  @StateObject var vm: BluetoothViewModel = .init()
 
   var connected: Bool {
-    manager.connectedScale != nil
+    vm.connectedScale != nil
   }
 
   var body: some View {
@@ -22,7 +22,7 @@ struct ScaleManager: View {
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
           NavigationLink(
-            destination: ScaleListView().environmentObject(manager),
+            destination: ScaleListView().environmentObject(vm),
             label: {
               Label("Manage your scale", systemImage: "gearshape")
             }
