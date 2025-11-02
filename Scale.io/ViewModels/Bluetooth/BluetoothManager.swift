@@ -3,7 +3,8 @@ import CoreBluetooth
 
 class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
   @Published var enabled = true
-  @Published var scales: [CBPeripheral] = []
+  @Published var availableScales: [CBPeripheral] = []
+  @Published var scale: CBPeripheral?
   static let shared = BluetoothManager()
   private let scaleUUID = CBUUID(string: Secrets.SCALE_UUID)
 
@@ -12,6 +13,10 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
   private override init() {
     super.init()
     centralManager = CBCentralManager(delegate: self, queue: nil)
+  }
+
+  func connect(scale: CBPeripheral) {
+    centralManager.connect(scale)
   }
 
   func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -35,10 +40,18 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
       UUIDs.contains(scaleUUID)
     else { return }
 
-    if !scales.contains(where: { $0.identifier == peripheral.identifier }) {
-      scales.append(peripheral)
-      print("Found scale:", peripheral.name ?? "Scale")
+    if !availableScales.contains(where: { $0.identifier == peripheral.identifier }) {
+      availableScales.append(peripheral)
+      print("Found scale:", peripheral.name!)
     }
+  }
+
+  func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    self.scale = peripheral
+  }
+
+  func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    // Handle error
   }
 
 }

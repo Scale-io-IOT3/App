@@ -15,7 +15,7 @@ enum Measurement: String, CaseIterable {
     }
   }
 
-  func convert(_ value: Double, from: Measurement, to: Measurement = .grams) -> Double {
+  func convert(_ value: Double, from: Measurement = .grams, to: Measurement = .grams) -> Double {
     let grams = value * from.toGramsFactor
     return grams / to.toGramsFactor
   }
