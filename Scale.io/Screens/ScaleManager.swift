@@ -1,23 +1,31 @@
 import SwiftUI
 
 struct ScaleManager: View {
+  @StateObject var manager = BluetoothManager.shared
+  @State var connected = false
   var body: some View {
     NavigationStack {
-      VStack(spacing: 40) {
+      VStack(spacing: 48) {
+
         Spacer()
+
         WeightView()
         ScaleControlsView()
+
         Spacer()
-        ScaleConnectionState()
+
+        ScaleConnectionState(connected: connected)
       }
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
-          Button {
-            print("Test")
-          } label: {
-            Label("Add", systemImage: "plus")
-          }
+          NavigationLink(
+            destination: ScaleListView().environmentObject(manager),
+            label: {
+              Label("Manage your scale", systemImage: "gearshape")
+            }
+          )
         }
+
       }
     }
   }
@@ -50,14 +58,15 @@ struct ScaleControlsView: View {
 }
 
 struct ScaleConnectionState: View {
+  @State var connected: Bool
   var body: some View {
     VStack(spacing: 4) {
       Text("Battery: 100%")
         .font(.subheadline)
         .foregroundColor(.secondary)
-      Text("Connected")
+      Text(connected ? "Connected" : "Disconnected")
         .font(.footnote)
-        .foregroundColor(.green)
+        .foregroundColor(connected ? .green : .red)
     }
     .padding(.bottom, 24)
   }
