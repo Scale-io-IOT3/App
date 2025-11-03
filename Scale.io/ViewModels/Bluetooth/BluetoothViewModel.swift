@@ -3,26 +3,29 @@ import CoreBluetooth
 import Foundation
 
 @MainActor
-class BluetoothViewModel: ObservableObject {
+final class BluetoothViewModel: ObservableObject {
   @Published var availableScales: [CBPeripheral] = []
   @Published var connectedScale: CBPeripheral?
+  @Published var characteristics: [CBCharacteristic] = []
   @Published var isBluetoothEnabled = false
 
-  private var manager: BluetoothManager
+  private let manager: BluetoothManager = BluetoothManager.shared
+  private var cancellables = Set<AnyCancellable>()
 
-  init() {
-    self.manager = BluetoothManager.shared
-    bind()
-  }
+  init() { bind() }
 
   private func bind() {
     manager.$availableScales
-      .receive(on: DispatchQueue.main)
       .assign(to: &$availableScales)
 
     manager.$connectedScale
-      .receive(on: DispatchQueue.main)
       .assign(to: &$connectedScale)
+
+    manager.$characteristics
+      .assign(to: &$characteristics)
+
+    manager.$isBluetoothEnabled
+      .assign(to: &$isBluetoothEnabled)
   }
 
   func connect(to scale: CBPeripheral) {

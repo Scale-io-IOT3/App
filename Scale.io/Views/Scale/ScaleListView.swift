@@ -27,15 +27,25 @@ private struct ScaleRow: View {
   @EnvironmentObject var vm: BluetoothViewModel
   let scale: CBPeripheral
   var body: some View {
-    Text(scale.name!)
-      .swipeActions(edge: .trailing) {
-        Button(role: .confirm) {
-          vm.connect(to: scale)
-        } label: {
-          Image(systemName: "link")
-        }
-        .tint(.accent)
+    HStack {
+      Text(scale.name ?? "Unknown")
+      Spacer()
+      if scale.identifier == vm.connectedScale?.identifier {
+        Image(systemName: "checkmark.circle.fill")
+          .tint(.accent)
+          .transition(.scale.combined(with: .opacity))
+          .animation(.spring(), value: vm.connectedScale)
+
       }
+    }
+    .swipeActions(edge: .trailing) {
+      Button(role: .confirm) {
+        vm.connect(to: scale)
+      } label: {
+        Image(systemName: "link")
+      }
+      .tint(.accent)
+    }
 
   }
 }
