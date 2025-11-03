@@ -30,13 +30,11 @@ private struct ScaleRow: View {
     HStack {
       Text(scale.name ?? "Unknown")
       Spacer()
-      if scale.identifier == vm.connectedScale?.identifier {
-        Image(systemName: "checkmark.circle.fill")
-          .tint(.accent)
-          .transition(.scale.combined(with: .opacity))
-          .animation(.spring(), value: vm.connectedScale)
-
-      }
+      Image(systemName: "checkmark.circle.fill")
+        .foregroundStyle(Color(.accent))
+        .opacity(scale.identifier == vm.connectedScale?.identifier ? 1 : 0)
+        .scaleEffect(scale.identifier == vm.connectedScale?.identifier ? 1 : 0.5)
+        .animation(.spring(), value: vm.connectedScale)
     }
     .swipeActions(edge: .trailing) {
       Button(role: .confirm) {
@@ -46,6 +44,5 @@ private struct ScaleRow: View {
       }
       .tint(.accent)
     }
-
   }
 }
