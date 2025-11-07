@@ -9,7 +9,7 @@ final class BluetoothManager: NSObject, ObservableObject {
   @Published private(set) var connectedScale: CBPeripheral?
   @Published private(set) var characteristics: [CBCharacteristic] = []
   @Published private(set) var isBluetoothEnabled = false
-  @Published private(set) var weightOnScale = 0
+  @Published private(set) var weightOnScale : Float = 0
   @Published private(set) var state: ConnectionState = .idle
 
   private let scaleUUID = CBUUID(string: Config.SCALE_UUID)
@@ -148,8 +148,8 @@ extension BluetoothManager: CBPeripheralDelegate {
     }
     guard let data = characteristic.value else { return }
 
-    let weight = data.withUnsafeBytes { $0.load(as: UInt16.self) }
-    self.weightOnScale = Int(weight) as Int
+    let weight = data.withUnsafeBytes { $0.load(as: Float.self) }
+    self.weightOnScale = weight as Float
     print("Weight (grams): \(weightOnScale)")
 
   }
