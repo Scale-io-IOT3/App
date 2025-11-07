@@ -11,7 +11,7 @@ enum HTTPError: Error {
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-  private let baseURL: String = Secrets.API
+  private let baseURL: String = Config.API
   static let shared = BaseClient()
 
   private init() {}

@@ -9,10 +9,11 @@ final class BluetoothManager: NSObject, ObservableObject {
   @Published private(set) var connectedScale: CBPeripheral?
   @Published private(set) var characteristics: [CBCharacteristic] = []
   @Published private(set) var isBluetoothEnabled = false
+  @Published private(set) var weightOnScale = 0
+  @Published private(set) var state: ConnectionState = .idle
 
-  private let scaleUUID = CBUUID(string: Secrets.SCALE_UUID)
+  private let scaleUUID = CBUUID(string: Config.SCALE_UUID)
   private var centralManager: CBCentralManager!
-
   private var peripheralMap: [UUID: CBPeripheral] = [:]
 
   private override init() {
@@ -22,6 +23,7 @@ final class BluetoothManager: NSObject, ObservableObject {
 
   func connect(to scale: CBPeripheral) {
     scale.delegate = self
+    self.state = .connecting
     centralManager.connect(scale)
   }
 
@@ -77,15 +79,20 @@ extension BluetoothManager: CBCentralManagerDelegate {
     connectedScale = peripheral
     peripheral.delegate = self
     central.stopScan()
-    peripheral.discoverServices(nil)
+    peripheral.discoverServices([CBUUID(string: Config.SCALE_UUID)])
   }
 
-  func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-    print("Disconnected from:", peripheral.name ?? "Unknown")
+  func centralManager(
+    _ central: CBCentralManager,
+    didDisconnectPeripheral peripheral: CBPeripheral,
+    error: Error?
+  ) {
     if connectedScale?.identifier == peripheral.identifier {
       connectedScale = nil
     }
     central.scanForPeripherals(withServices: [scaleUUID], options: nil)
+    print("Disconnected from:", peripheral.name ?? "Unknown")
+    self.state = .idle
   }
 }
 
@@ -99,11 +106,18 @@ extension BluetoothManager: CBPeripheralDelegate {
 
     for service in services {
       print("Discovering characteristics for service:", service.uuid)
-      peripheral.discoverCharacteristics(nil, for: service)
+      peripheral.discoverCharacteristics(
+        [CBUUID(string: Config.WEIGHT_CHARACTERISTIC)],
+        for: service
+      )
     }
   }
 
-  func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+  func peripheral(
+    _ peripheral: CBPeripheral,
+    didDiscoverCharacteristicsFor service: CBService,
+    error: Error?
+  ) {
     if let error = error {
       print("Error discovering characteristics:", error.localizedDescription)
       return
@@ -120,9 +134,14 @@ extension BluetoothManager: CBPeripheralDelegate {
     }
 
     print("Discovered characteristics for \(service.uuid): \(discovered.map { $0.uuid })")
+    self.state = .connected
   }
 
-  func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+  func peripheral(
+    _ peripheral: CBPeripheral,
+    didUpdateValueFor characteristic: CBCharacteristic,
+    error: Error?
+  ) {
     if let error = error {
       print("Error updating value for \(characteristic.uuid):", error.localizedDescription)
       return
@@ -130,7 +149,8 @@ extension BluetoothManager: CBPeripheralDelegate {
     guard let data = characteristic.value else { return }
 
     let weight = data.withUnsafeBytes { $0.load(as: UInt16.self) }
-    print("Weight (grams): \(weight)")
+    self.weightOnScale = Int(weight) as Int
+    print("Weight (grams): \(weightOnScale)")
 
   }
 

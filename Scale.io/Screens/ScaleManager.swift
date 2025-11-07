@@ -12,8 +12,11 @@ struct ScaleManager: View {
       VStack(spacing: 48) {
         Spacer()
 
-        WeightView()
-        ScaleControlsView()
+        Group {
+          WeightView()
+          ScaleControlsView()
+        }
+        .environmentObject(vm)
 
         Spacer()
 
@@ -34,14 +37,22 @@ struct ScaleManager: View {
 }
 
 struct WeightView: View {
+  @EnvironmentObject var vm: BluetoothViewModel
   var body: some View {
     VStack(spacing: 8) {
       Text("Weight")
         .font(.headline)
         .foregroundColor(.secondary)
 
-      Text("0 g")
-        .font(.system(size: 64, weight: .bold, design: .rounded))
+      HStack(spacing: 8) {
+        Text(vm.weightOnScale, format: .number)
+          .contentTransition(.numericText(value: Double(vm.weightOnScale)))
+          .monospacedDigit()
+
+        Text("g")
+      }
+      .font(.system(size: 64, weight: .bold, design: .rounded))
+
     }
   }
 }

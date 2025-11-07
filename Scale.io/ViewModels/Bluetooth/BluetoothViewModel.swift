@@ -8,10 +8,10 @@ final class BluetoothViewModel: ObservableObject {
   @Published var connectedScale: CBPeripheral?
   @Published var characteristics: [CBCharacteristic] = []
   @Published var isBluetoothEnabled = false
+  @Published var weightOnScale = 0
+  @Published var state: ConnectionState = .idle
 
   private let manager: BluetoothManager = BluetoothManager.shared
-  private var cancellables = Set<AnyCancellable>()
-
   init() { bind() }
 
   private func bind() {
@@ -26,17 +26,19 @@ final class BluetoothViewModel: ObservableObject {
 
     manager.$isBluetoothEnabled
       .assign(to: &$isBluetoothEnabled)
+
+    manager.$weightOnScale
+      .assign(to: &$weightOnScale)
+
+    manager.$state
+      .assign(to: &$state)
   }
 
   func connect(to scale: CBPeripheral) {
     if let current = connectedScale {
+      guard scale.identifier != current.identifier else { return }
       manager.disconnect(from: current)
     }
     manager.connect(to: scale)
-  }
-
-  func disconnect() {
-    guard let current = connectedScale else { return }
-    manager.disconnect(from: current)
   }
 }

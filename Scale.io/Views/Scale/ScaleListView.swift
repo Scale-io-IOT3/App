@@ -12,9 +12,15 @@ struct ScaleListView: View {
       ContentUnavailableView("No scale around", systemImage: "antenna.radiowaves.left.and.right.slash")
     }
   }
+
   var body: some View {
-    view
-      .environmentObject(vm)
+    ZStack {
+      view
+        .environmentObject(vm)
+      if vm.state == .connecting {
+        Progress()
+      }
+    }
   }
 }
 
@@ -26,6 +32,10 @@ struct ScaleListView: View {
 private struct ScaleRow: View {
   @EnvironmentObject var vm: BluetoothViewModel
   let scale: CBPeripheral
+  private var isConnectedScale: Bool {
+    vm.connectedScale?.identifier == scale.identifier
+  }
+
   var body: some View {
     HStack {
       Text(scale.name ?? "Unknown")
@@ -37,12 +47,32 @@ private struct ScaleRow: View {
         .animation(.spring(), value: vm.connectedScale)
     }
     .swipeActions(edge: .trailing) {
-      Button(role: .confirm) {
+      Button {
         vm.connect(to: scale)
       } label: {
-        Image(systemName: "link")
+        Image(systemName: "personalhotspot")
       }
-      .tint(.accent)
+      .tint(isConnectedScale ? .gray : .accent)
+      .disabled(isConnectedScale)
     }
+  }
+}
+
+private struct Progress: View {
+  @EnvironmentObject var vm: BluetoothViewModel
+  var body: some View {
+    ZStack {
+      Color.black.opacity(0.4)
+        .ignoresSafeArea()
+        .allowsHitTesting(true)
+
+      ProgressView()
+        .controlSize(.large)
+        .padding(20)
+        .background(.ultraThinMaterial)
+        .cornerRadius(12)
+    }
+    .transition(.opacity)
+    .animation(.easeInOut, value: vm.state)
   }
 }
