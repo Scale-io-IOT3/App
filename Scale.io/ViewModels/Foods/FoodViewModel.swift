@@ -15,10 +15,12 @@ class FoodViewModel: ObservableObject {
   }
 
   private func fetch(type: FoodType, food: String, grams: Double) async -> [Food] {
-    let request = type.makeRequest(food: food, grams: grams)
+    let g = grams > 0 ? grams : 100
+    let request = type.makeRequest(food: food, grams: g)
 
     do {
-      self.foods = try await service.fetchFoods(request: request)
+      let fetchedFoods = try await service.fetchFoods(request: request)
+      self.foods = fetchedFoods
     } catch {
       print("Failed to fetch \(food): \(error)")
       self.foods = []
@@ -26,4 +28,5 @@ class FoodViewModel: ObservableObject {
 
     return self.foods
   }
+
 }

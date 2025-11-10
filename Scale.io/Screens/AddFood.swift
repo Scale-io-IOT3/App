@@ -3,6 +3,7 @@ import SwiftUI
 struct AddFood: View {
   @State private var selectedMode: EntryMode = .search
   @ObservedObject private var foodVm = FoodViewModel()
+  @EnvironmentObject var bluetooth: BluetoothViewModel
   @State private var foods: [Food] = []
   @State private var isLoading: Bool = false
   @State private var presentSheet: Bool = false
@@ -45,7 +46,8 @@ struct AddFood: View {
         resetState(for: selectedMode)
       }
     ) {
-      FoodDetailsView(food: foodVm.selected).presentationDetents([.fraction(0.48)])
+      FoodDetailsView(food: foodVm.selected)
+        .presentationDetents([.fraction(0.48)])
     }
   }
 
@@ -66,13 +68,13 @@ struct AddFood: View {
         isLoading: $isLoading,
         search: $searchText
       ) { query in
-        await foodVm.getFreshFood(food: query)
+        await foodVm.getFreshFood(food: query, quantity: bluetooth.weightOnScale)
       }
 
     case .scan:
       ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) {
         query in
-        await foodVm.getProduct(food: query)
+        await foodVm.getProduct(food: query, quantity: bluetooth.weightOnScale)
       }
       .environment(\.colorScheme, .dark)
       .ignoresSafeArea()
