@@ -7,7 +7,7 @@ struct AppSwitcher: View {
     ZStack {
       switch auth.state {
       case .loading:
-        ProgressView().controlSize(.extraLarge)
+        ProgressView().controlSize(.large)
 
       case .authenticated:
         MainScreen()

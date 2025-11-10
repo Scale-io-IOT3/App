@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ScaleManager: View {
-  @StateObject var vm: BluetoothViewModel = .init()
+  @EnvironmentObject var vm: BluetoothViewModel
 
   var connected: Bool {
     vm.connectedScale != nil
