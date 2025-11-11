@@ -3,6 +3,7 @@ import SwiftUI
 
 struct FoodDetailsView: View {
   let food: Food?
+  var onOk: () -> Void = {}
   @Environment(\.dismiss) var dismiss
   var body: some View {
 
@@ -12,13 +13,13 @@ struct FoodDetailsView: View {
     }
   }
 
-  @ViewBuilder
-  private var view: some View {
+  @ViewBuilder private var view: some View {
     if let f = food {
       FoodHeaderView(food: f)
       MacrosGrid(food: f)
       CustomButton {
         dismiss()
+        onOk()
       }
     } else {
       ContentUnavailableView("No food found", systemImage: "leaf.fill")

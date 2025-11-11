@@ -8,7 +8,7 @@ final class BluetoothViewModel: ObservableObject {
   @Published var connectedScale: CBPeripheral?
   @Published var characteristics: [CBCharacteristic] = []
   @Published var isBluetoothEnabled = false
-  @Published var weightOnScale : Double = 0
+  @Published var weight : Double = 0
   @Published var state: ConnectionState = .idle
 
   private let manager: BluetoothManager = BluetoothManager.shared
@@ -27,8 +27,8 @@ final class BluetoothViewModel: ObservableObject {
     manager.$isBluetoothEnabled
       .assign(to: &$isBluetoothEnabled)
 
-    manager.$weightOnScale
-      .assign(to: &$weightOnScale)
+    manager.$weight
+      .assign(to: &$weight)
 
     manager.$state
       .assign(to: &$state)

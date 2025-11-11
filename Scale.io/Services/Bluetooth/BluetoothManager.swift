@@ -9,7 +9,7 @@ final class BluetoothManager: NSObject, ObservableObject {
   @Published private(set) var connectedScale: CBPeripheral?
   @Published private(set) var characteristics: [CBCharacteristic] = []
   @Published private(set) var isBluetoothEnabled = false
-  @Published private(set) var weightOnScale : Double = 0
+  @Published private(set) var weight: Double = 0
   @Published private(set) var state: ConnectionState = .idle
 
   private let scaleUUID = CBUUID(string: Config.SCALE_UUID)
@@ -30,7 +30,7 @@ final class BluetoothManager: NSObject, ObservableObject {
   func disconnect(from scale: CBPeripheral) {
     centralManager.cancelPeripheralConnection(scale)
   }
-
+ 
   func subscribe(to peripheral: CBPeripheral, at characteristic: CBCharacteristic) {
     guard characteristic.properties.contains(.notify) else {
       print("Characteristic \(characteristic.uuid) does not support notifications.")
@@ -146,21 +146,19 @@ extension BluetoothManager: CBPeripheralDelegate {
       print("Error updating value for \(characteristic.uuid):", error.localizedDescription)
       return
     }
-    
+
     guard let data = characteristic.value else { return }
-    
+
     guard data.count >= MemoryLayout<Float>.size else {
       print("Invalid data length: \(data.count)")
       return
     }
-    
-    let weightFloat = data.withUnsafeBytes { $0.load(as: Float.self) }
-    let weightDouble = Double(weightFloat)
-    
-    self.weightOnScale = weightDouble
-    print("Weight (grams): \(weightOnScale)")
-  }
 
+    self.weight = Double(
+      data.withUnsafeBytes { $0.load(as: Float.self) }
+    )
+    print("Weight (grams): \(weight)")
+  }
 
   func peripheral(
     _ peripheral: CBPeripheral,

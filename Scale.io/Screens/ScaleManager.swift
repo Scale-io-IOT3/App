@@ -45,8 +45,8 @@ struct WeightView: View {
         .foregroundColor(.secondary)
 
       HStack(spacing: 8) {
-        Text(vm.weightOnScale, format: .number.precision(.fractionLength(1)))
-          .contentTransition(.numericText(value: Double(vm.weightOnScale)))
+        Text(vm.weight, format: .number.precision(.fractionLength(1)))
+          .contentTransition(.numericText(value: Double(vm.weight)))
           .monospacedDigit()
 
         Text("g")
