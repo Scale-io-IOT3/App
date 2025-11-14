@@ -30,7 +30,7 @@ final class BluetoothManager: NSObject, ObservableObject {
   func disconnect(from scale: CBPeripheral) {
     centralManager.cancelPeripheralConnection(scale)
   }
- 
+
   func subscribe(to peripheral: CBPeripheral, at characteristic: CBCharacteristic) {
     guard characteristic.properties.contains(.notify) else {
       print("Characteristic \(characteristic.uuid) does not support notifications.")
@@ -154,9 +154,9 @@ extension BluetoothManager: CBPeripheralDelegate {
       return
     }
 
-    self.weight = Double(
-      data.withUnsafeBytes { $0.load(as: Float.self) }
-    )
+    let raw = Double(data.withUnsafeBytes { $0.load(as: Float.self) })
+    self.weight = Double(round(raw * 10) / 10)
+
     print("Weight (grams): \(weight)")
   }
 

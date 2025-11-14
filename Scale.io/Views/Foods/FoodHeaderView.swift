@@ -26,7 +26,7 @@ struct MacrosChartView: View {
   var macroValues: [(macro: MacrosColor, value: Double)] {
     [
       (.carbs, food.macros.percentages.carbs),
-      (.fats, food.macros.percentages.fat),
+      (.fat, food.macros.percentages.fat),
       (.proteins, food.macros.percentages.proteins),
     ]
   }

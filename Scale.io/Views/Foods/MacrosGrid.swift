@@ -7,7 +7,7 @@ struct MacrosGrid: View {
     let macros: [(macro: MacrosColor, grams: Double, percent: Double)] = [
       (.carbs, food.macros.carbohydrates, food.macros.percentages.carbs),
       (.proteins, food.macros.proteins, food.macros.percentages.proteins),
-      (.fats, food.macros.fat, food.macros.percentages.fat),
+      (.fat, food.macros.fat, food.macros.percentages.fat),
     ]
 
     Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 10) {

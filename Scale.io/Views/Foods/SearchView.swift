@@ -2,19 +2,25 @@ import SwiftUI
 
 struct SearchView: View {
   @EnvironmentObject private var foodVm: FoodViewModel
+  @EnvironmentObject private var bluetooth: BluetoothViewModel
   @Binding var foods: [Food]
   @Binding var presentSheet: Bool
   @Binding var isLoading: Bool
   @Binding var search: String
 
   var fetch: (_ query: String) async -> [Food]
-  private let searchDelay: UInt64 = 700_000_000  // 0.7 seconds
+  private let searchDelay: UInt64 = 700_000_000
 
   var body: some View {
     FoodListView(foods: $foods, presentSheet: $presentSheet)
       .overlay(overlayView)
       .searchable(text: $search)
       .task(id: search) { await searchTask() }
+      .task(id: bluetooth.weight) {
+        guard !search.isEmpty else { return }
+        await fetchFoods()
+      }
+
   }
 
   @ViewBuilder

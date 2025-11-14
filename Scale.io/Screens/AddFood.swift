@@ -19,6 +19,7 @@ struct AddFood: View {
       ZStack {
         contentView
           .environmentObject(foodVm)
+          .environmentObject(bluetooth)
           .navigationTitle(selectedMode.rawValue.capitalized)
 
         VStack {
