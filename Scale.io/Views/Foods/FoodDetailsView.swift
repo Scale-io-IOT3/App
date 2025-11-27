@@ -17,7 +17,7 @@ struct FoodDetailsView: View {
     if let f = food {
       FoodHeaderView(food: f)
       MacrosGrid(food: f)
-      CustomButton {
+      CustomButton(text: "Register") {
         dismiss()
         onOk()
       }
@@ -30,14 +30,14 @@ struct FoodDetailsView: View {
 #Preview {
   let food = Food(
     name: "Banana",
-    brands: "Monke",
-    calories: 120,
+    brands: "Generic",
+    calories: 105,
     quantity: 1,
     macros: Macros(
       carbohydrates: 27,
-      fat: 0.3,
+      fat: 0.4,
       proteins: 1.3,
-      percentages: Percentages(carbs: 75, fat: 2, proteins: 23)
+      percentages: Percentages(carbs: 93, fat: 3, proteins: 4)
     )
   )
   FoodDetailsView(food: food)
