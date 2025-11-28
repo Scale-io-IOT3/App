@@ -22,7 +22,7 @@ enum TabRepresentation: String, CaseIterable, Hashable {
     case .scale:
       ScaleManager()
     case .dashboard:
-      Text("Dash")
+      Dashboard()
     }
   }
 
