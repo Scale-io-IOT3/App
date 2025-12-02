@@ -16,6 +16,7 @@ struct FoodDetailsView: View {
   @ViewBuilder private var view: some View {
     if let f = food {
       FoodHeaderView(food: f)
+            .padding(.top)
       MacrosGrid(food: f)
       CustomButton(text: "Register") {
         dismiss()

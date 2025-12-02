@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CalorieBar: View {
-    var progress: Double
+    var progress: Double   // expected 0.0 .. 1.0
     var calories: Int
     var goal: Double
     
@@ -16,25 +16,30 @@ struct CalorieBar: View {
                     .foregroundStyle(.secondary)
             }
             
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.gray.opacity(0.2))
-                    .frame(height: 22)
-                
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [.accent, .blue],
-                            startPoint: .leading,
-                            endPoint: .trailing
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 22)
+                    
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [.accentColor, .cyan],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .animation(.easeOut(duration: 0.45), value: progress)
+                        .frame(width: geo.size.width * min(progress, 1.0), height: 22)
+                        .animation(.easeOut(duration: 0.45), value: progress)
+                }
             }
-            .frame(maxWidth: 250)
+            .frame(height: 22)
         }
         .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
 
 
