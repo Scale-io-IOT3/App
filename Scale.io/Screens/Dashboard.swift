@@ -18,22 +18,26 @@ struct Dashboard: View {
                         Spacer()
                     }
 
-                    if !todayFoods.isEmpty {
-                        ForEach(todayFoods, id: \.id) { food in
-                            FoodCard(food: food)
+                    Group {
+                        if !todayFoods.isEmpty {
+                            ForEach(todayFoods, id: \.id) { food in
+                                FoodCard(food: food)
+                            }
+                        } else {
+                            ContentUnavailableView(
+                                "Looks a little quiet here today.",
+                                systemImage: "carrot.fill",
+                                description: Text("Add a little something when you’re ready.")
+                            )
+                            .padding(.top, 50)
                         }
-                    } else {
-                        Spacer()
-                        ContentUnavailableView("No food logged today", systemImage: "leaf.fill")
                     }
 
                 }
                 .padding(.horizontal)
             }
         }
-        .task {
-            todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
-        }
+        .task { todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods } }
         .padding(.top)
     }
 

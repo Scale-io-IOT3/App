@@ -3,7 +3,7 @@ import SwiftUI
 
 struct FoodDetailsView: View {
     let food: Food?
-    var onOk: () async -> Void = {}
+    var register: () async -> Void = {}
     @Environment(\.dismiss) var dismiss
     var body: some View {
 
@@ -19,26 +19,14 @@ struct FoodDetailsView: View {
             MacrosGrid(food: f)
             CustomButton(text: "Register") {
                 dismiss()
-                Task { await onOk() }
+                Task { await register() }
             }
         } else {
-            ContentUnavailableView("No food found", systemImage: "leaf.fill")
+            ContentUnavailableView("Hmm… nothing popped up.", systemImage: "carrot.fill")
         }
     }
 }
 
 #Preview {
-    let food = Food(
-        name: "Banana",
-        brands: "Generic",
-        calories: 105,
-        quantity: 1,
-        macros: Macros(
-            carbohydrates: 27,
-            fat: 0.4,
-            proteins: 1.3,
-            percentages: Percentages(carbs: 93, fat: 3, proteins: 4)
-        )
-    )
-    FoodDetailsView(food: food)
+    FoodDetailsView(food: M_foods[0])
 }

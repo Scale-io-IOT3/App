@@ -66,9 +66,9 @@ struct SearchView: View {
 struct StartSearch: View {
   var body: some View {
     ContentUnavailableView(
-      "Search for foods",
-      systemImage: "leaf.fill",
-      description: Text("Start typing to find food items.")
+      "Let’s find something delicious.",
+      systemImage: "carrot.fill",
+      description: Text("Start typing to explore tasty options.")
     )
   }
 }
