@@ -2,13 +2,16 @@ import SwiftUI
 
 struct AddFood: View {
     @State private var selectedMode: EntryMode = .search
-    @EnvironmentObject var foodVm : FoodViewModel
+    @EnvironmentObject var foodVm: FoodViewModel
     @EnvironmentObject var bluetooth: BluetoothViewModel
+    @EnvironmentObject var meals: MealsViewModel
     @State private var foods: [Food] = []
     @State private var isLoading: Bool = false
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
+    @State private var goToDashboard = false
+
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -31,8 +34,7 @@ struct AddFood: View {
                         }
                         .glassEffect(.regular)
                         .pickerStyle(.segmented)
-                        .padding(.vertical)
-                        .padding(.horizontal, 52)
+                        .padding()
                         .onChange(of: selectedMode) {
                             resetState(for: selectedMode)
                         }
@@ -40,22 +42,37 @@ struct AddFood: View {
                     Spacer()
                 }
             }
+            .navigationDestination(isPresented: $goToDashboard) {
+                Dashboard()
+            }
         }
-        .sheet(
-            isPresented: $presentSheet,
-        ) {
+        .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
             FoodDetailsView(food: foodVm.selected) {
                 resetState(for: selectedMode)
+                await register()
             }
             .presentationDetents([.fraction(0.48)])
         }
     }
 
     private func resetState(for mode: EntryMode) {
+        startScanning = (mode == .scan)
         foods = []
         isLoading = false
         searchText = ""
-        startScanning = (mode == .scan)
+    }
+
+    private func register() async {
+        if let selected = foodVm.selected {
+            await meals.create(using: selected)
+            goToDashboard = true
+        }
+    }
+    
+    private func scannerReset(){
+        if self.selectedMode == .scan {
+            resetState(for: selectedMode)
+        }
     }
 
     @ViewBuilder
@@ -72,8 +89,7 @@ struct AddFood: View {
             }
 
         case .scan:
-            ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) {
-                query in
+            ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) { query in
                 await foodVm.getProduct(food: query, quantity: bluetooth.weight)
             }
             .environment(\.colorScheme, .dark)

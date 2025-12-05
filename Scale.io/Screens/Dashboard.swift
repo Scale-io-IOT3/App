@@ -3,7 +3,7 @@ import SwiftUI
 struct Dashboard: View {
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
-    var todayFoods: [Food] { meal.meals.flatMap { $0.foods } }
+    @State var todayFoods: [Food] = []
     var todayCalories: Int { todayFoods.compactMap { $0.calories }.reduce(0, +) }
 
     var body: some View {
@@ -31,10 +31,8 @@ struct Dashboard: View {
                 .padding(.horizontal)
             }
         }
-        .onAppear {
-            Task {
-                await meal.fetch()
-            }
+        .task {
+            todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
         }
         .padding(.top)
     }

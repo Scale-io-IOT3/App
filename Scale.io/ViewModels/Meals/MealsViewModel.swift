@@ -6,26 +6,32 @@ class MealsViewModel: ObservableObject {
     private let service = MealService()
 
     func create(using foods: [Food]) async {
-        let request = MealRequest(foods: foods)
+        let request = MealRequest(foods: foods.map { $0.toDto() })
+        if (try? await service.create(request: request)) != nil { return await fetch() }
+    }
 
-        if let response = try? await service.create(request: request) {
-            meals.append(response.meal)
-            return
-        }
-
-        print("Nope")
+    func create(using food: Food) async {
+        let array: [Food] = [food]
+        await self.create(using: array)
     }
 
     func create(from meal: Meal) async {
         await create(using: meal.foods)
     }
 
-    func fetch() async {
-        do {
-            let response = try await service.fetch()
+    func getTodayFoods() async -> [Meal] {
+        await self.fetch()
+
+        var utcCalendar: Calendar = Calendar(identifier: .gregorian)
+        utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
+
+        return meals.filter { utcCalendar.isDate($0.date, inSameDayAs: Date()) }
+    }
+
+    private func fetch() async {
+        if let response = try? await service.fetch() {
             self.meals = response
-        } catch {
-            print("Nope \(error)")
         }
     }
+
 }

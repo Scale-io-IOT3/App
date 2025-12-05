@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CalorieBar: View {
-    var progress: Double   // expected 0.0 .. 1.0
+    var progress: Double
     var calories: Int
     var goal: Double
     

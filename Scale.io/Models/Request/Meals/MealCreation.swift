@@ -1,4 +1,4 @@
-struct MealRequest : Request{
+struct MealRequest : Codable, Request{
     var endpoint: String = "meals"
-    var foods: [Food]
+    var foods: [FoodDto]
 }
