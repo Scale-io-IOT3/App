@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct CalorieBar: View {
-    var progress: Double
     var calories: Int
     var goal: Double
-    
+    var progress: Double {
+        Double(calories) / Double(goal)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            
+
             HStack {
                 Text("\(calories) kcal")
                     .font(.title3.bold())
@@ -15,13 +17,13 @@ struct CalorieBar: View {
                 Text("Goal: \(Int(goal))")
                     .foregroundStyle(.secondary)
             }
-            
+
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(Color.gray.opacity(0.2))
                         .frame(height: 22)
-                    
+
                     Capsule()
                         .fill(
                             LinearGradient(
@@ -40,6 +42,3 @@ struct CalorieBar: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
-
-
-

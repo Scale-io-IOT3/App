@@ -276,6 +276,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app needs to access bluetooth to connect to your scale";
 				INFOPLIST_KEY_NSCameraUsageDescription = "App needs to access camera for users to scan their barcodes";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "App needs to access health datas to get daily BMR";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need to access your daily calories intake.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -315,6 +316,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app needs to access bluetooth to connect to your scale";
 				INFOPLIST_KEY_NSCameraUsageDescription = "App needs to access camera for users to scan their barcodes";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "App needs to access health datas to get daily BMR";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need to access your daily calories intake.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -9,8 +9,7 @@ struct Dashboard: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                let bmrGoal = health.BMR ?? 1200
-                CalorieBar(progress: Double(todayCalories) / Double(bmrGoal), calories: todayCalories, goal: bmrGoal)
+                CalorieBar(calories: todayCalories, goal: health.BMR ?? 1200)
 
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
@@ -37,7 +36,10 @@ struct Dashboard: View {
                 .padding(.horizontal)
             }
         }
-        .task { todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods } }
+        .task {
+            todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
+            await health.getUserBMR()
+        }
         .padding(.top)
     }
 
