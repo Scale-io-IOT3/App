@@ -4,12 +4,11 @@ struct Dashboard: View {
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
     @State var todayFoods: [Food] = []
-    var todayCalories: Int { todayFoods.compactMap { $0.calories }.reduce(0, +) }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                CalorieBar(calories: todayCalories, goal: health.BMR ?? 1200)
+                CalorieBar(calories: health.daily ?? 0, goal: health.BMR ?? 1200)
 
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
@@ -39,6 +38,7 @@ struct Dashboard: View {
         .task {
             todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
             await health.getUserBMR()
+            await health.getDailyCalories()
         }
         .padding(.top)
     }

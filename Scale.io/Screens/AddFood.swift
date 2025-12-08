@@ -2,16 +2,16 @@ import SwiftUI
 
 struct AddFood: View {
     @State private var selectedMode: EntryMode = .search
-    @EnvironmentObject var foodVm: FoodViewModel
+    @EnvironmentObject var food: FoodViewModel
     @EnvironmentObject var bluetooth: BluetoothViewModel
     @EnvironmentObject var meals: MealsViewModel
+    @EnvironmentObject var health: HealthViewModel
     @State private var foods: [Food] = []
     @State private var isLoading: Bool = false
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
     @State private var goToDashboard = false
-
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -21,7 +21,7 @@ struct AddFood: View {
         NavigationStack {
             ZStack {
                 contentView
-                    .environmentObject(foodVm)
+                    .environmentObject(food)
                     .environmentObject(bluetooth)
                     .navigationTitle(selectedMode.rawValue.capitalized)
 
@@ -47,9 +47,9 @@ struct AddFood: View {
             }
         }
         .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
-            FoodDetailsView(food: foodVm.selected) {
+            FoodDetailsView(food: food.selected) {
                 resetState(for: selectedMode)
-                await register()
+                if await health.log(food: food.selected) { await register() }
             }
             .presentationDetents([.fraction(0.48)])
         }
@@ -63,13 +63,13 @@ struct AddFood: View {
     }
 
     private func register() async {
-        if let selected = foodVm.selected {
+        if let selected = food.selected {
             await meals.create(using: selected)
             goToDashboard = true
         }
     }
-    
-    private func scannerReset(){
+
+    private func scannerReset() {
         if self.selectedMode == .scan {
             resetState(for: selectedMode)
         }
@@ -85,12 +85,12 @@ struct AddFood: View {
                 isLoading: $isLoading,
                 search: $searchText
             ) { query in
-                await foodVm.getFreshFood(food: query, quantity: bluetooth.weight)
+                await food.getFreshFood(food: query, quantity: bluetooth.weight)
             }
 
         case .scan:
             ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) { query in
-                await foodVm.getProduct(food: query, quantity: bluetooth.weight)
+                await food.getProduct(food: query, quantity: bluetooth.weight)
             }
             .environment(\.colorScheme, .dark)
             .ignoresSafeArea()

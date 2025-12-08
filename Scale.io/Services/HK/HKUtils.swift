@@ -24,12 +24,12 @@ class HKUtils {
         if let height = HKObjectType.quantityType(forIdentifier: .height) {
             dataTypesToRead.insert(height)
         }
-        
+
         if let carbs = HKObjectType.quantityType(forIdentifier: .dietaryCarbohydrates) {
             dataTypesToRead.insert(carbs)
             dataTypesToWrite.insert(carbs)
         }
-        if let satFat = HKObjectType.quantityType(forIdentifier: .dietaryFatSaturated) {
+        if let satFat = HKObjectType.quantityType(forIdentifier: .dietaryFatTotal) {
             dataTypesToRead.insert(satFat)
             dataTypesToWrite.insert(satFat)
         }
@@ -73,6 +73,47 @@ class HKUtils {
             }
             store.execute(query)
         }
+    }
+
+    public func saveNutrition(
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        calories: Int
+    ) async -> Bool {
+        guard
+            let carbsType = HKQuantityType.quantityType(forIdentifier: .dietaryCarbohydrates),
+            let fatType = HKQuantityType.quantityType(forIdentifier: .dietaryFatTotal),
+            let proteinType = HKQuantityType.quantityType(forIdentifier: .dietaryProtein),
+            let caloriesType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed)
+        else { return false }
+        
+        let now = Date()
+        
+        let samples: [HKQuantitySample] = [
+            HKQuantitySample(type: carbsType, quantity: .init(unit: .gram(), doubleValue: carbs), start: now, end: now),
+            HKQuantitySample(type: fatType, quantity: .init(unit: .gram(), doubleValue: fat), start: now, end: now),
+            HKQuantitySample(type: proteinType, quantity: .init(unit: .gram(), doubleValue: protein), start: now, end: now),
+            HKQuantitySample(type: caloriesType, quantity: .init(unit: .kilocalorie(), doubleValue: Double(calories)), start: now, end: now)
+        ]
+        
+        return await withCheckedContinuation { continuation in
+            store.save(samples) { success, error in
+                if let error = error {
+                    print("Error saving nutrition: \(error.localizedDescription)")
+                }
+                continuation.resume(returning: success)
+            }
+        }
+    }
+
+
+    func canWriteNutrition() -> Bool {
+        guard
+            let type = HKObjectType.quantityType(forIdentifier: .dietaryCarbohydrates)
+        else { return false }
+
+        return store.authorizationStatus(for: type) == .sharingAuthorized
     }
 
     public func getAge() -> Int? {

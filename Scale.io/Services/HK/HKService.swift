@@ -4,10 +4,10 @@ internal import HealthKit
 class HKService {
     private let health = HKUtils()
 
-    public func fetchDailyCalories(for date: Date) async -> Double {
+    public func fetchDailyCalories(for date: Date) async -> Int {
         if let calories = await health.fetchDailyCalories(for: date) {
             let daily = await MainActor.run {
-                return calories
+                return Int(calories)
             }
 
             return daily
@@ -36,4 +36,19 @@ class HKService {
             return 0
         }
     }
+
+    public func log(_ food: Food) async -> Bool {
+        if !health.canWriteNutrition() {
+            print("Cannot save — HealthKit permission not granted yet.")
+            return false
+        }
+
+        return await health.saveNutrition(
+            carbs: food.macros.carbohydrates,
+            fat: food.macros.fat,
+            protein: food.macros.proteins,
+            calories: food.calories
+        )
+    }
+
 }
