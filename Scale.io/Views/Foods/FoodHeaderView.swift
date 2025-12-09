@@ -42,9 +42,9 @@ struct MacrosChartView: View {
                 .foregroundStyle(by: .value("Macro", macro.macro.rawValue))
             }
             .chartForegroundStyleScale([
-                "Carbs": Color.cyan,
-                "Fat": Color.yellow,
-                "Protein": Color.mint,
+                "Carbs": MacrosColor.carbs.color,
+                "Fat": MacrosColor.fat.color,
+                "Protein": MacrosColor.proteins.color,
             ])
             .chartLegend(.hidden)
             

@@ -17,7 +17,7 @@ struct FoodDetailsView: View {
             FoodHeaderView(food: f)
                 .padding(.top)
             MacrosGrid(food: f)
-            CustomButton(text: "Register") {
+            CustomButton(text: "Add Food") {
                 dismiss()
                 Task { await register() }
             }

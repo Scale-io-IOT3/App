@@ -6,17 +6,18 @@ struct Dashboard: View {
     @State var todayFoods: [Food] = []
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                CalorieBar(calories: health.daily ?? 0, goal: health.BMR ?? 1200)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    CalorieBar(calories: health.daily ?? 0, goal: health.BMR ?? 1200)
+                        .padding(.top)
 
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("Today's Food").font(.title2.bold())
-                        Spacer()
-                    }
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("Today's Food").font(.title2.bold())
+                            Spacer()
+                        }
 
-                    Group {
                         if !todayFoods.isEmpty {
                             ForEach(todayFoods, id: \.id) { food in
                                 FoodCard(food: food)
@@ -30,17 +31,18 @@ struct Dashboard: View {
                             .padding(.top, 50)
                         }
                     }
-
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
+            .navigationTitle("Dashboard")
+            .task { await load() }
         }
-        .task {
-            todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
-            await health.getUserBMR()
-            await health.getDailyCalories()
-        }
-        .padding(.top)
+    }
+
+    private func load() async {
+        self.todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
+        await health.getUserBMR()
+        await health.getDailyCalories()
     }
 
 }

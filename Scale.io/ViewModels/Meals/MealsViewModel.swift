@@ -21,11 +21,9 @@ class MealsViewModel: ObservableObject {
 
     func getTodayFoods() async -> [Meal] {
         await self.fetch()
-
-        var utcCalendar: Calendar = Calendar(identifier: .gregorian)
-        utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
-
-        return meals.filter { utcCalendar.isDate($0.date, inSameDayAs: Date()) }
+        
+        let todayStart = Time.shared.todayStart
+        return meals.filter { Time.shared.isSameDay($0.date, todayStart) }
     }
 
     private func fetch() async {

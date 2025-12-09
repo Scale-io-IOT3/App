@@ -52,11 +52,10 @@ class HKUtils {
     }
 
     public func fetchDailyCalories(for date: Date) async -> Double? {
-        guard let energyType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed) else {
-            return nil
-        }
+        guard let energyType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed)
+        else { return nil }
 
-        let calendar = Calendar.current
+        let calendar = Time.shared.calendar
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
@@ -68,8 +67,9 @@ class HKUtils {
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
             ) { _, result, _ in
-                let total = result?.sumQuantity()?.doubleValue(for: .kilocalorie())
-                continuation.resume(returning: total)
+                continuation.resume(
+                    returning: result?.sumQuantity()?.doubleValue(for: .kilocalorie())
+                )
             }
             store.execute(query)
         }
@@ -87,16 +87,26 @@ class HKUtils {
             let proteinType = HKQuantityType.quantityType(forIdentifier: .dietaryProtein),
             let caloriesType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed)
         else { return false }
-        
+
         let now = Date()
-        
+
         let samples: [HKQuantitySample] = [
             HKQuantitySample(type: carbsType, quantity: .init(unit: .gram(), doubleValue: carbs), start: now, end: now),
             HKQuantitySample(type: fatType, quantity: .init(unit: .gram(), doubleValue: fat), start: now, end: now),
-            HKQuantitySample(type: proteinType, quantity: .init(unit: .gram(), doubleValue: protein), start: now, end: now),
-            HKQuantitySample(type: caloriesType, quantity: .init(unit: .kilocalorie(), doubleValue: Double(calories)), start: now, end: now)
+            HKQuantitySample(
+                type: proteinType,
+                quantity: .init(unit: .gram(), doubleValue: protein),
+                start: now,
+                end: now
+            ),
+            HKQuantitySample(
+                type: caloriesType,
+                quantity: .init(unit: .kilocalorie(), doubleValue: Double(calories)),
+                start: now,
+                end: now
+            ),
         ]
-        
+
         return await withCheckedContinuation { continuation in
             store.save(samples) { success, error in
                 if let error = error {
@@ -106,7 +116,6 @@ class HKUtils {
             }
         }
     }
-
 
     func canWriteNutrition() -> Bool {
         guard

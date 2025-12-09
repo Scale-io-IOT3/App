@@ -10,16 +10,15 @@ struct ScaleManager: View {
             VStack(spacing: 48) {
                 Spacer()
 
-                Group {
-                    WeightView(m: m)
-                    ScaleControlsView(m: $m)
-                }
-                .environmentObject(vm)
+                WeightView(m: m)
 
                 Spacer()
 
+                ScaleControlsView(m: $m)
                 ScaleConnectionState(connected: connected)
+
             }
+            .environmentObject(vm)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(
@@ -44,16 +43,23 @@ struct WeightView: View {
                 .foregroundColor(.secondary)
 
             HStack(spacing: 8) {
-                Text(vm.weight, format: .number.precision(.fractionLength(1)))
+                Text(displayWeight(vm.weight, in: m), format: .number.precision(.fractionLength(1)))
+                    .lineLimit(1)
                     .contentTransition(.numericText(value: Double(vm.weight)))
                     .monospacedDigit()
 
                 Text(m.rawValue)
             }
             .font(.system(size: 64, weight: .bold, design: .rounded))
+            .minimumScaleFactor(0.5)
 
         }
     }
+
+    func displayWeight(_ baseGrams: Double, in unit: Measurement) -> Double {
+        return baseGrams / unit.toGramsFactor
+    }
+
 }
 
 struct ScaleControlsView: View {
@@ -66,15 +72,10 @@ struct ScaleControlsView: View {
                 .padding()
 
             CustomButton(text: "Unit", color: .cyan) {
-                convert()
+                m = m.next
             }
             .padding()
         }
-    }
-
-    private func convert() {
-        vm.weight = m.convert(vm.weight, from: m, to: m.next)
-        m = m.next
     }
 }
 
@@ -83,9 +84,11 @@ struct ScaleConnectionState: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text("Battery: 100%")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            if connected {
+                Text("Battery: 100%")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
 
             Text(connected ? "Connected" : "Disconnected")
                 .font(.footnote)
@@ -97,4 +100,5 @@ struct ScaleConnectionState: View {
 
 #Preview {
     ScaleManager()
+        .environmentObject(BluetoothViewModel())
 }
