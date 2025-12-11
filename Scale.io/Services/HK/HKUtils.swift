@@ -55,8 +55,8 @@ class HKUtils {
         guard let energyType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed)
         else { return nil }
 
-        let startOfDay = Time.shared.dayStart(for: date)
-        let endOfDay = Time.shared.dayAfter(for: date)
+        let startOfDay = date.start
+        let endOfDay = date.end
 
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: endOfDay)
 

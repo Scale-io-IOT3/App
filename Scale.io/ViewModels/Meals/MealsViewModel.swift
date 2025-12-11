@@ -8,7 +8,6 @@ class MealsViewModel: ObservableObject {
     func create(using foods: [Food]) async {
         let dto = foods.map { $0.toDto() }
 
-        print(dto)
         let request = MealRequest(foods: dto)
         if (try? await service.create(request: request)) != nil { return await fetch() }
     }
@@ -25,7 +24,7 @@ class MealsViewModel: ObservableObject {
     func getTodayFoods() async -> [Food] {
         await self.fetch()
 
-        let response = meals.filter { Time.shared.isSameDay($0.date, Time.shared.dayStart()) }
+        let response = meals.filter { $0.createdAt.isToday() }
         return response.flatMap { $0.foods }
     }
 

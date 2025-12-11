@@ -1,115 +1,121 @@
 import Foundation
 
 enum HTTPError: Error {
-  case invalidURL
-  case invalidResponse
-  case invalidData
-  case statusCode(Int)
-  case unknownError(Error)
+    case invalidURL
+    case invalidResponse
+    case invalidData
+    case statusCode(Int)
+    case unknownError(Error)
 }
 
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-  private let baseURL: String = Config.API
-  static let shared = BaseClient()
+    private let baseURL: String = Config.API
+    static let shared = BaseClient()
 
-  private init() {}
+    private init() {}
 
-  func get<T: Decodable>(endpoint: String) async throws -> T {
-    guard let url = URL(string: baseURL + endpoint) else {
-      throw HTTPError.invalidURL
+    func get<T: Decodable>(endpoint: String) async throws -> T {
+        guard let url = URL(string: baseURL + endpoint) else {
+            throw HTTPError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        await request.addToken()
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        try validate(response: response)
+
+        return try decode(data: data)
     }
 
-    var request = URLRequest(url: url)
-    request.httpMethod = "GET"
-    await request.addToken()
-    let (data, response) = try await URLSession.shared.data(for: request)
+    func post<T: Encodable, U: Decodable>(
+        endpoint: String,
+        request: T? = nil,
+        debug: Bool = false,
+        withAuth: Bool = true
+    )
+        async throws -> U
+    {
+        let urlString = baseURL + endpoint
 
-    try validate(response: response)
+        guard let url = URL(string: urlString) else {
+            throw HTTPError.invalidURL
+        }
 
-    return try decode(data: data)
-  }
+        var _request = URLRequest(url: url)
+        _request.httpMethod = "POST"
 
-  func post<T: Encodable, U: Decodable>(endpoint: String, request: T? = nil, debug: Bool = false, withAuth: Bool = true)
-    async throws -> U
-  {
-    let urlString = baseURL + endpoint
+        if withAuth {
+            await _request.addToken()
+        } else {
+            _request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
 
-    guard let url = URL(string: urlString) else {
-      throw HTTPError.invalidURL
+        let body = try encode(body: request ?? EmptyBody() as! T)
+        _request.httpBody = body
+
+        if debug {
+            self.debug(request: _request)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: _request)
+
+        try validate(response: response)
+
+        return try decode(data: data)
     }
 
-    var _request = URLRequest(url: url)
-    _request.httpMethod = "POST"
+    private func validate(response: URLResponse) throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw HTTPError.invalidResponse
+        }
 
-    if withAuth {
-      await _request.addToken()
-    } else {
-      _request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("HTTP Error: \(httpResponse.statusCode)")
+            throw HTTPError.statusCode(httpResponse.statusCode)
+        }
     }
 
-    let body = try encode(body: request ?? EmptyBody() as! T)
-    _request.httpBody = body
+    private func decode<T: Decodable>(data: Data) throws -> T {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
 
-    if debug {
-      self.debug(request: _request)
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            throw HTTPError.invalidData
+        }
     }
 
-    let (data, response) = try await URLSession.shared.data(for: _request)
+    private func encode<T: Encodable>(body: T) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
 
-    try validate(response: response)
-
-    return try decode(data: data)
-  }
-
-  private func validate(response: URLResponse) throws {
-    guard let httpResponse = response as? HTTPURLResponse else {
-      throw HTTPError.invalidResponse
+        do {
+            return try encoder.encode(body)
+        } catch {
+            throw HTTPError.invalidData
+        }
     }
 
-    guard (200...299).contains(httpResponse.statusCode) else {
-      print("HTTP Error: \(httpResponse.statusCode)")
-      throw HTTPError.statusCode(httpResponse.statusCode)
+    private func debug(request: URLRequest) {
+        if let json = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+            print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
+            print("➡️ Body: \(json)")
+        }
     }
-  }
-
-  private func decode<T: Decodable>(data: Data) throws -> T {
-    let decoder = JSONDecoder()
-    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-    do {
-      return try decoder.decode(T.self, from: data)
-    } catch {
-      throw HTTPError.invalidData
-    }
-  }
-
-  private func encode<T: Encodable>(body: T) throws -> Data {
-    let encoder = JSONEncoder()
-    encoder.keyEncodingStrategy = .convertToSnakeCase
-
-    do {
-      return try encoder.encode(body)
-    } catch {
-      throw HTTPError.invalidData
-    }
-  }
-
-  private func debug(request: URLRequest) {
-    if let json = String(data: request.httpBody ?? Data(), encoding: .utf8) {
-      print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
-      print("➡️ Body: \(json)")
-    }
-  }
 }
 
 extension URLRequest {
-  mutating func addToken() async {
-    setValue("application/json", forHTTPHeaderField: "Content-Type")
-    guard let token = await TokenHandler.shared.get() else {
-      return
+    mutating func addToken() async {
+        setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let token = await TokenHandler.shared.get() else {
+            return
+        }
+        setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
-    setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-  }
 }
