@@ -3,6 +3,7 @@ import SwiftUI
 
 struct FoodDetailsView: View {
     let food: Food?
+    var action : Bool = true
     var register: () async -> Void = {}
     @Environment(\.dismiss) var dismiss
     var body: some View {
@@ -17,9 +18,11 @@ struct FoodDetailsView: View {
             FoodHeaderView(food: f)
                 .padding(.top)
             MacrosGrid(food: f)
-            CustomButton(text: "Add Food") {
-                dismiss()
-                Task { await register() }
+            if action {
+                CustomButton(text: "Add Food") {
+                    Task { await register() }
+                    dismiss()
+                }
             }
         } else {
             ContentUnavailableView("Hmm… nothing popped up.", systemImage: "carrot.fill")

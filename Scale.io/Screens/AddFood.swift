@@ -49,7 +49,7 @@ struct AddFood: View {
         .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
             FoodDetailsView(food: food.selected) {
                 resetState(for: selectedMode)
-                if await health.log(food: food.selected) { await register() }
+                if await health.log(food.selected) { await register() }
             }
             .presentationDetents([.fraction(0.48)])
         }

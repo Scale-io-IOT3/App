@@ -14,7 +14,7 @@ struct FoodCard: View {
         }
         .buttonStyle(.plain)
         .sheet(item: $selected) { food in
-            FoodDetailsView(food: food)
+            FoodDetailsView(food: food, action: false)
                 .presentationDetents([.fraction(0.48)])
         }
     }

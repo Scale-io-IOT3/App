@@ -14,7 +14,7 @@ class HealthViewModel: ObservableObject {
         self.daily = await service.fetchDailyCalories(for: date)
     }
 
-    public func log(food: Food?) async -> Bool {
+    public func log(_ food: Food?) async -> Bool {
         guard let f = food else { return false }
         return await service.log(f)
     }

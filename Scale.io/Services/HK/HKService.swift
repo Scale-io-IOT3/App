@@ -42,12 +42,13 @@ class HKService {
             print("Cannot save — HealthKit permission not granted yet.")
             return false
         }
+        
 
         return await health.saveNutrition(
             carbs: food.macros.carbohydrates,
             fat: food.macros.fat,
             protein: food.macros.proteins,
-            calories: food.calories
+            calories: food.macros.calories
         )
     }
 

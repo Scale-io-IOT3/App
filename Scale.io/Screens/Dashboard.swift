@@ -40,7 +40,7 @@ struct Dashboard: View {
     }
 
     private func load() async {
-        self.todayFoods = (await meal.getTodayFoods()).flatMap { $0.foods }
+        self.todayFoods = await meal.getTodayFoods()
         await health.getUserBMR()
         await health.getDailyCalories()
     }

@@ -2,44 +2,44 @@ import Charts
 import SwiftUI
 
 struct FoodHeaderView: View {
-  let food: Food
-  var body: some View {
-    HStack(spacing: 24) {
-      MacrosChartView(food: food)
-      VStack(alignment: .leading) {
-        Text(food.name)
-          .font(.title3)
-          .fontWeight(.semibold)
-        
-        Text(food.brands)
-          .font(.headline)
-          .foregroundStyle(.secondary)
-      }
+    let food: Food
+    var body: some View {
+        HStack(spacing: 24) {
+            MacrosChartView(food: food)
+            VStack(alignment: .leading) {
+                Text(food.name)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                Text(food.brands)
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
-  }
 }
 
 struct MacrosChartView: View {
     let food: Food
-    var size: CGFloat = 100 
-    
-    var macroValues: [(macro: MacrosColor, value: Double)] {
+    var size: CGFloat = 100
+
+    var macroValues: [(m: MacrosColor, value: Double)] {
         [
             (.carbs, food.macros.percentages.carbs),
             (.fat, food.macros.percentages.fat),
             (.proteins, food.macros.percentages.proteins),
         ]
     }
-    
+
     var body: some View {
         ZStack {
-            Chart(macroValues, id: \.macro.rawValue) { macro in
+            Chart(macroValues, id: \.m.rawValue) { m in
                 SectorMark(
-                    angle: .value("Percentage", macro.value),
+                    angle: .value("Percentage", m.value),
                     innerRadius: .ratio(0.7),
                     angularInset: 1
                 )
-                .foregroundStyle(by: .value("Macro", macro.macro.rawValue))
+                .foregroundStyle(by: .value("Macro", m.m.rawValue))
             }
             .chartForegroundStyleScale([
                 "Carbs": MacrosColor.carbs.color,
@@ -47,9 +47,9 @@ struct MacrosChartView: View {
                 "Protein": MacrosColor.proteins.color,
             ])
             .chartLegend(.hidden)
-            
+
             VStack(spacing: 2) {
-                Text("\(food.calories)")
+                Text("\(food.macros.calories)")
                     .font(.system(size: size * 0.25, weight: .bold))
                 Text("kcal")
                     .font(.system(size: size * 0.1))
@@ -59,4 +59,3 @@ struct MacrosChartView: View {
         .frame(width: size, height: size)
     }
 }
-

@@ -6,7 +6,10 @@ class MealsViewModel: ObservableObject {
     private let service = MealService()
 
     func create(using foods: [Food]) async {
-        let request = MealRequest(foods: foods.map { $0.toDto() })
+        let dto = foods.map { $0.toDto() }
+
+        print(dto)
+        let request = MealRequest(foods: dto)
         if (try? await service.create(request: request)) != nil { return await fetch() }
     }
 
@@ -19,17 +22,16 @@ class MealsViewModel: ObservableObject {
         await create(using: meal.foods)
     }
 
-    func getTodayFoods() async -> [Meal] {
+    func getTodayFoods() async -> [Food] {
         await self.fetch()
-        
-        let todayStart = Time.shared.todayStart
-        return meals.filter { Time.shared.isSameDay($0.date, todayStart) }
+
+        let response = meals.filter { Time.shared.isSameDay($0.date, Time.shared.dayStart()) }
+        return response.flatMap { $0.foods }
     }
 
     private func fetch() async {
-        if let response = try? await service.fetch() {
-            self.meals = response
-        }
+        guard let response = try? await service.fetch() else { return }
+        self.meals = response
     }
 
 }
