@@ -9,7 +9,7 @@ struct Dashboard: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    CalorieBar(calories: health.daily ?? 0, goal: health.BMR ?? 1200)
+                    CalorieBar(calories: health.calories ?? 0, goal: health.BMR ?? 1200)
                         .padding(.top)
 
                     VStack(alignment: .leading, spacing: 16) {

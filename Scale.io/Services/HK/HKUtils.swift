@@ -51,18 +51,14 @@ class HKUtils {
         }
     }
 
-    public func fetchDailyCalories(for date: Date) async -> Double? {
-        guard let energyType = HKQuantityType.quantityType(forIdentifier: .dietaryEnergyConsumed)
-        else { return nil }
+    public func query(for type: HKQuantityTypeIdentifier, at date: Date) async -> Double? {
+        guard let type = HKQuantityType.quantityType(forIdentifier: type) else { return nil }
 
-        let startOfDay = date.start
-        let endOfDay = date.end
-
-        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: endOfDay)
+        let predicate = HKQuery.predicateForSamples(withStart: date.start, end: date.end)
 
         return await withCheckedContinuation { continuation in
             let query = HKStatisticsQuery(
-                quantityType: energyType,
+                quantityType: type,
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
             ) { _, result, _ in

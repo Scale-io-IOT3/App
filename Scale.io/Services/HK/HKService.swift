@@ -4,16 +4,29 @@ internal import HealthKit
 class HKService {
     private let health = HKUtils()
 
-    public func fetchDailyCalories(for date: Date) async -> Int {
-        if let calories = await health.fetchDailyCalories(for: date) {
-            let daily = await MainActor.run {
-                return Int(calories)
-            }
+    public func fetchDailyCalories(for date: Date = .init()) async -> Int {
+        return await self.query(for: .dietaryEnergyConsumed, at: date)
+    }
 
-            return daily
-        }
+    public func fetchDailyCarbs(at date: Date) async -> Double {
+        return await self.query(for: .dietaryCarbohydrates, at: date)
+    }
 
-        return 0
+    public func fetchDailyProteins(at date: Date) async -> Double {
+        return await self.query(for: .dietaryProtein, at: date)
+    }
+
+    public func fetchDailyFat(at date: Date) async -> Double {
+        return await self.query(for: .dietaryFatTotal, at: date)
+    }
+
+    private func query(for macro: HKQuantityTypeIdentifier, at date: Date) async -> Double {
+        return await health.query(for: macro, at: date) ?? 0
+    }
+
+    private func query(for macro: HKQuantityTypeIdentifier, at date: Date) async -> Int {
+        let value = await health.query(for: macro, at: date) ?? 0
+        return Int(value)
     }
 
     public func calculateBMR() async -> Double {
@@ -42,7 +55,6 @@ class HKService {
             print("Cannot save — HealthKit permission not granted yet.")
             return false
         }
-        
 
         return await health.saveNutrition(
             carbs: food.macros.carbohydrates,
