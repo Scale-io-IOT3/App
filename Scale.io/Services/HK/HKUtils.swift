@@ -2,9 +2,10 @@ import Foundation
 internal import HealthKit
 
 class HKUtils {
-    private let store = HKHealthStore()
 
-    init() { requestAuth() }
+    private init() { requestAuth() }
+    static let shared = HKUtils()
+    private let store = HKHealthStore()
 
     private func requestAuth() {
         guard HKHealthStore.isHealthDataAvailable() else { return }
@@ -51,7 +52,7 @@ class HKUtils {
         }
     }
 
-    public func query(for type: HKQuantityTypeIdentifier, at date: Date) async -> Double? {
+    public func query(for type: HKQuantityTypeIdentifier, at date: Date, using unit: HKUnit) async -> Double? {
         guard let type = HKQuantityType.quantityType(forIdentifier: type) else { return nil }
 
         let predicate = HKQuery.predicateForSamples(withStart: date.start, end: date.end)
@@ -63,7 +64,7 @@ class HKUtils {
                 options: .cumulativeSum
             ) { _, result, _ in
                 continuation.resume(
-                    returning: result?.sumQuantity()?.doubleValue(for: .kilocalorie())
+                    returning: result?.sumQuantity()?.doubleValue(for: unit)
                 )
             }
             store.execute(query)

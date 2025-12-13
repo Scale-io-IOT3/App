@@ -2,42 +2,37 @@ import Foundation
 internal import HealthKit
 
 class HKService {
-    private let health = HKUtils()
+    private let health = HKUtils.shared
+
+    private(set) lazy var age: Int = health.getAge() ?? 0
+    private(set) lazy var sex: HKBiologicalSex = health.getSex() ?? .notSet
 
     public func fetchDailyCalories(for date: Date = .init()) async -> Int {
-        return await self.query(for: .dietaryEnergyConsumed, at: date)
+        let value = await query(.dietaryEnergyConsumed, at: date, unit: .kilocalorie())
+        return Int(value)
     }
 
     public func fetchDailyCarbs(at date: Date) async -> Double {
-        return await self.query(for: .dietaryCarbohydrates, at: date)
+        await query(.dietaryCarbohydrates, at: date, unit: .gram())
     }
 
     public func fetchDailyProteins(at date: Date) async -> Double {
-        return await self.query(for: .dietaryProtein, at: date)
+        await query(.dietaryProtein, at: date, unit: .gram())
     }
 
     public func fetchDailyFat(at date: Date) async -> Double {
-        return await self.query(for: .dietaryFatTotal, at: date)
+        await query(.dietaryFatTotal, at: date, unit: .gram())
     }
 
-    private func query(for macro: HKQuantityTypeIdentifier, at date: Date) async -> Double {
-        return await health.query(for: macro, at: date) ?? 0
-    }
-
-    private func query(for macro: HKQuantityTypeIdentifier, at date: Date) async -> Int {
-        let value = await health.query(for: macro, at: date) ?? 0
-        return Int(value)
+    private func query(_ id: HKQuantityTypeIdentifier, at date: Date, unit: HKUnit) async -> Double {
+        await health.query(for: id, at: date, using: unit) ?? 0
     }
 
     public func calculateBMR() async -> Double {
         guard
-            let age = health.getAge(),
-            let sex = health.getSex(),
             let weight = await health.fetchLatestWeight(),
             let height = await health.fetchLatestHeight()
-        else {
-            return 0
-        }
+        else { return 0 }
         let h = height * 100
 
         switch sex {
@@ -51,7 +46,7 @@ class HKService {
     }
 
     public func log(_ food: Food) async -> Bool {
-        if !health.canWriteNutrition() {
+        guard health.canWriteNutrition() else {
             print("Cannot save — HealthKit permission not granted yet.")
             return false
         }
@@ -63,5 +58,4 @@ class HKService {
             calories: food.macros.calories
         )
     }
-
 }

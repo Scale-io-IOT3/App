@@ -1,5 +1,6 @@
 internal import Combine
 import Foundation
+internal import HealthKit
 
 class HealthViewModel: ObservableObject {
     @Published public var calories: Int? = nil
@@ -7,14 +8,10 @@ class HealthViewModel: ObservableObject {
     @Published public var carbs: Double? = nil
     @Published public var fat: Double? = nil
     @Published public var BMR: Double? = nil
-    let service = HKService()
+    private let service = HKService()
 
     public func getUserBMR() async {
         self.BMR = await service.calculateBMR()
-    }
-
-    public func getDailyCalories(for date: Date = .init()) async {
-        self.calories = await service.fetchDailyCalories(for: date)
     }
 
     public func log(_ food: Food?) async -> Bool {
@@ -23,6 +20,7 @@ class HealthViewModel: ObservableObject {
     }
 
     public func getDailyMacros(for date: Date = .init()) async {
+        self.calories = await service.fetchDailyCalories(for: date)
         proteins = await service.fetchDailyProteins(at: date)
         fat = await service.fetchDailyFat(at: date)
         carbs = await service.fetchDailyCarbs(at: date)

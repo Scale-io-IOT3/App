@@ -11,7 +11,7 @@ struct AddFood: View {
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
-    @State private var goToDashboard = false
+    @State private var redirect = false
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -42,16 +42,17 @@ struct AddFood: View {
                     Spacer()
                 }
             }
-            .navigationDestination(isPresented: $goToDashboard) {
-                Dashboard()
-            }
+            .navigationDestination(isPresented: $redirect) { TodayFoodsView() }
         }
         .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
             FoodDetailsView(food: food.selected) {
                 resetState(for: selectedMode)
-                if await health.log(food.selected) { await register() }
+                if await health.log(food.selected) {
+                    await register()
+                    await meals.getTodayFoods()
+                }
             }
-            .presentationDetents([.fraction(0.48)])
+            .resize()
         }
     }
 
@@ -65,7 +66,7 @@ struct AddFood: View {
     private func register() async {
         if let selected = food.selected {
             await meals.create(using: selected)
-            goToDashboard = true
+            redirect = true
         }
     }
 

@@ -12,7 +12,7 @@ struct AuthView: View {
         Text("Let's sign you in.")
           .font(.title)
           .fontWeight(.semibold)
-          .foregroundStyle(Color.accent)
+          .foregroundStyle(.accent)
 
         Text("You have been missed")
           .font(.headline)

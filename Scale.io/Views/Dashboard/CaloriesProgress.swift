@@ -38,7 +38,6 @@ struct CalorieBar: View {
             }
             .frame(height: 22)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top)
     }
 }

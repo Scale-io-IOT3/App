@@ -3,6 +3,7 @@ import Foundation
 
 class MealsViewModel: ObservableObject {
     @Published var meals: [Meal] = []
+    @Published var today: [Food] = []
     private let service = MealService()
 
     func create(using foods: [Food]) async {
@@ -21,11 +22,11 @@ class MealsViewModel: ObservableObject {
         await create(using: meal.foods)
     }
 
-    func getTodayFoods() async -> [Food] {
+    func getTodayFoods() async {
         await self.fetch()
 
         let response = meals.filter { $0.createdAt.isToday() }
-        return response.flatMap { $0.foods }
+        self.today = response.flatMap { $0.foods }
     }
 
     private func fetch() async {

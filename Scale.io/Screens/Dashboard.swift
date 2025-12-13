@@ -3,46 +3,44 @@ import SwiftUI
 struct Dashboard: View {
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
-    @State var todayFoods: [Food] = []
-
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    CalorieBar(calories: health.calories ?? 0, goal: health.BMR ?? 1200)
-                        .padding(.top)
+            VStack(spacing: 32) {
+                CalorieBar(calories: health.calories ?? 0, goal: health.BMR ?? 1200)
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("Today's Food").font(.title2.bold())
-                            Spacer()
-                        }
-
-                        if !todayFoods.isEmpty {
-                            ForEach(todayFoods, id: \.id) { food in
-                                FoodCard(food: food)
-                            }
-                        } else {
-                            ContentUnavailableView(
-                                "Looks a little quiet here today.",
-                                systemImage: "carrot.fill",
-                                description: Text("Add a little something when you’re ready.")
-                            )
-                            .padding(.top, 50)
-                        }
+                VStack(spacing: 16) {
+                    NavigationLink {
+                        TodayFoodsView()
+                            .environmentObject(meal)
+                    } label: {
+                        TodayCardView(foods: meal.today)
                     }
-                    .padding(.horizontal)
+                    .buttonStyle(.plain)
                 }
+
+                if let calories = health.calories, calories > 0 {
+                    HStack{
+                        MacrosBreakdown(calories: calories)
+                            .environmentObject(health)
+                        
+                        Spacer()
+                    }
+                }
+
+                Spacer()
+
             }
+            .padding(.horizontal)
             .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.large)
             .task { await load() }
         }
     }
 
     private func load() async {
-        self.todayFoods = await meal.getTodayFoods()
+        await meal.getTodayFoods()
         await health.getUserBMR()
-        await health.getDailyCalories()
+        await health.getDailyMacros()
     }
 
 }
@@ -51,4 +49,46 @@ struct Dashboard: View {
     Dashboard()
         .environmentObject(MealsViewModel())
         .environmentObject(HealthViewModel())
+}
+
+private struct TodayCardView: View {
+    let foods: [Food]
+    private let color: Color = .accentColor
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+
+                HStack {
+                    Text("Today’s foods")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Text(
+                        foods.isEmpty
+                            ? "No foods yet"
+                            : "\(foods.count) food\(foods.count > 1 ? "s" : "")"
+                    )
+                    .font(.caption.bold())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(color.opacity(0.2))
+                    .clipShape(Capsule())
+                }
+
+                Text("View all foods registered today")
+                    .font(.subheadline)
+                    .foregroundStyle(foods.isEmpty ? .tertiary : .secondary)
+
+            }
+
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
 }

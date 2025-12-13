@@ -15,7 +15,7 @@ struct FoodCard: View {
         .buttonStyle(.plain)
         .sheet(item: $selected) { food in
             FoodDetailsView(food: food, action: false)
-                .presentationDetents([.fraction(0.48)])
+                .resize()
         }
     }
 }
@@ -25,7 +25,6 @@ private struct FoodCardContentView: View {
     var body: some View {
         HStack(spacing: 12) {
             MacrosChartView(food: food, size: 80)
-
             VStack(alignment: .leading, spacing: 4) {
                 Text(food.name)
                     .font(.subheadline)
