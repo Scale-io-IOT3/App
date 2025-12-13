@@ -7,26 +7,19 @@ struct ScaleManager: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 48) {
-                Spacer()
-
+            VStack(spacing: 32) {
                 WeightView(m: m)
-
-                Spacer()
-
                 ScaleControlsView(m: $m)
                 ScaleConnectionState(connected: connected)
-
+                    .padding(.top, 48)
             }
+            .padding(.top, 48)
             .environmentObject(vm)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(
-                        destination: ScaleListView().environmentObject(vm),
-                        label: {
-                            Label("Manage your scale", systemImage: "gearshape")
-                        }
-                    )
+                    NavigationLink(destination: ScaleListView()) {
+                        Image(systemName: "gearshape")
+                    }
                 }
             }
         }
@@ -68,10 +61,10 @@ struct ScaleControlsView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CustomButton(text: "Tare") {}
+            CustomButton(text: "Tare", color: .cyan) {}
                 .padding()
 
-            CustomButton(text: "Unit", color: .cyan) {
+            CustomButton(text: "Unit") {
                 m = m.next
             }
             .padding()
@@ -83,16 +76,20 @@ struct ScaleConnectionState: View {
     let connected: Bool
 
     var body: some View {
-        VStack(spacing: 4) {
-            if connected {
-                Text("Battery: 100%")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+        HStack(spacing: 8) {
+            Circle()
+                .fill(connected ? .green : .red)
+                .frame(width: 8, height: 8)
 
             Text(connected ? "Connected" : "Disconnected")
                 .font(.footnote)
-                .foregroundColor(connected ? .green : .red)
+                .foregroundColor(.secondary)
+
+            if connected {
+                Text("• Battery 100%")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.bottom, 24)
     }

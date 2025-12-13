@@ -8,7 +8,7 @@ struct TodayFoodsView: View {
         guard !search.isEmpty else { return meal.today }
 
         return meal.today.filter {
-            $0.name.localizedCaseInsensitiveContains(search)
+            $0.name.localizedCaseInsensitiveContains(search) || $0.brands.localizedCaseInsensitiveContains(search)
         }
     }
 
@@ -17,9 +17,7 @@ struct TodayFoodsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if filteredFoods.isEmpty {
                     ContentUnavailableView(
-                        search.isEmpty
-                            ? "Looks a little quiet here today."
-                            : "No results",
+                        "Looks a little quiet here today.",
                         systemImage: "carrot.fill",
                         description: Text(
                             search.isEmpty

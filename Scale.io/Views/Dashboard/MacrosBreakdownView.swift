@@ -56,6 +56,7 @@ private struct MacroRow: View {
     let title: String
     let value: Double
     let color: Color
+    var text: String { String(format: "%.1f", value) }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -68,7 +69,7 @@ private struct MacroRow: View {
 
             Spacer()
 
-            Text(value, format: .number.precision(.fractionLength(1)))
+            Text("\(text) g")
                 .font(.subheadline.bold())
         }
     }
