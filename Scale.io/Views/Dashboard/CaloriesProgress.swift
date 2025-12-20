@@ -32,7 +32,13 @@ struct CalorieBar: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: geo.size.width * min(progress, 1.0), height: 22)
+                        .frame(width: {
+                            let raw = progress
+                            let finite = raw.isFinite ? raw : 0
+                            let clamped = min(max(finite, 0), 1)
+                            let w = geo.size.width * clamped
+                            return w.isFinite && w >= 0 ? w : 0
+                        }(), height: 22)
                         .animation(.easeOut(duration: 0.45), value: progress)
                 }
             }

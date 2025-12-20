@@ -18,32 +18,30 @@ struct AddFood: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                contentView
-                    .environmentObject(food)
-                    .environmentObject(bluetooth)
-                    .navigationTitle(selectedMode.rawValue.capitalized)
+        ZStack {
+            contentView
+                .environmentObject(food)
+                .environmentObject(bluetooth)
+                .navigationTitle(selectedMode.rawValue.capitalized)
 
-                VStack {
-                    if foods.isEmpty {
-                        Picker("Mode", selection: $selectedMode) {
-                            ForEach(EntryMode.allCases, id: \.self) { mode in
-                                Text(mode.rawValue.capitalized).tag(mode)
-                            }
-                        }
-                        .glassEffect(.regular)
-                        .pickerStyle(.segmented)
-                        .padding()
-                        .onChange(of: selectedMode) {
-                            resetState(for: selectedMode)
+            VStack {
+                if foods.isEmpty {
+                    Picker("Mode", selection: $selectedMode) {
+                        ForEach(EntryMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue.capitalized).tag(mode)
                         }
                     }
-                    Spacer()
+                    .glassEffect(.regular)
+                    .pickerStyle(.segmented)
+                    .padding()
+                    .onChange(of: selectedMode) {
+                        resetState(for: selectedMode)
+                    }
                 }
+                Spacer()
             }
-            .navigationDestination(isPresented: $redirect) { TodayFoodsView() }
         }
+        .navigationDestination(isPresented: $redirect) { TodayFoodsView() }
         .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
             FoodDetailsView(food: food.selected) {
                 resetState(for: selectedMode)
@@ -97,8 +95,4 @@ struct AddFood: View {
             .ignoresSafeArea()
         }
     }
-}
-
-#Preview {
-    AddFood()
 }
