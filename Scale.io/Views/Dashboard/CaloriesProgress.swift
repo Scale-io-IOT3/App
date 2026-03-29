@@ -3,19 +3,32 @@ import SwiftUI
 struct CalorieBar: View {
     var calories: Int
     var goal: Double
+
     var progress: Double {
         Double(calories) / Double(goal)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("\(calories) kcal")
-                    .font(.title3.bold())
+                Text("Daily Calories")
+                    .font(.headline)
                 Spacer()
-                Text("Goal: \(Int(goal))")
+                Text("\(Int(goal)) goal")
+                    .font(.caption.bold())
                     .foregroundStyle(.secondary)
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(calories)")
+                    .font(.title.bold())
+                Text("kcal")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int((min(max(progress, 0), 1)) * 100))%")
+                    .font(.headline.bold())
+                    .foregroundStyle(.accent)
             }
 
             GeometryReader { geo in
@@ -39,11 +52,15 @@ struct CalorieBar: View {
                             let w = geo.size.width * clamped
                             return w.isFinite && w >= 0 ? w : 0
                         }(), height: 22)
-                        .animation(.easeOut(duration: 0.45), value: progress)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.9), value: progress)
                 }
             }
             .frame(height: 22)
         }
-        .padding(.top)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }

@@ -9,8 +9,10 @@ struct FoodCard: View {
             selected = food
         } label: {
             FoodCardContentView(food: food)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color(.secondarySystemBackground))
+                )
         }
         .buttonStyle(.plain)
         .sheet(item: $selected) { food in
@@ -40,7 +42,7 @@ private struct FoodCardContentView: View {
 
             Spacer()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
         .padding(.horizontal, 12)
     }
 }

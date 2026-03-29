@@ -15,7 +15,7 @@ struct LastLoggedFoodView: View {
                     AddFood()
                 },
                 label: {
-                    NoLoogedFoodCard()
+                    NoLoggedFoodCard()
                         .environmentObject(health)
                         .environmentObject(food)
                         .environmentObject(bluetooth)
@@ -26,24 +26,34 @@ struct LastLoggedFoodView: View {
     }
 }
 
-private struct NoLoogedFoodCard: View {
+private struct NoLoggedFoodCard: View {
     var body: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("No foods logged yet")
+                Label("Last Logged", systemImage: "clock.fill")
+                    .font(.caption.bold())
+                    .foregroundStyle(.accent)
+
+                Text("No food logged yet")
                     .font(.subheadline.bold())
 
                 Text("The last logged food of the day will appear here")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            
+
+            Spacer()
+
             Image(systemName: "chevron.right")
                 .foregroundStyle(.secondary)
 
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .buttonStyle(.plain)
     }
 }
