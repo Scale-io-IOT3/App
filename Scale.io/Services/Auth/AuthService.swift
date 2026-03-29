@@ -1,10 +1,10 @@
 import Foundation
 
 class AuthService {
-  private let client = AuthClient.shared
+    private let client = AuthClient.shared
 
-  public func login(username: String, password: String) async throws -> AuthResponse {
-    let request = AuthRequest(username: username, password: password)
-    return try await client.login(request: request)
-  }
+    public func login(username: String, password: String) async throws -> AuthResponse {
+        let request = AuthRequest(username: username, password: password)
+        return try await client.login(request: request)
+    }
 }

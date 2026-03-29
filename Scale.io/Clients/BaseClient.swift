@@ -11,13 +11,13 @@ enum HTTPError: Error {
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-    private let baseURL: String = Config.API
+    private let baseURL: String = Config.DEV_API
     static let shared = BaseClient()
 
     private init() {}
 
     func get<T: Decodable>(endpoint: String) async throws -> T {
-        guard let url = URL(string: baseURL + endpoint) else {
+        guard let url = makeURL(endpoint: endpoint) else {
             throw HTTPError.invalidURL
         }
 
@@ -39,9 +39,7 @@ class BaseClient {
     )
         async throws -> U
     {
-        let urlString = baseURL + endpoint
-
-        guard let url = URL(string: urlString) else {
+        guard let url = makeURL(endpoint: endpoint) else {
             throw HTTPError.invalidURL
         }
 
@@ -107,6 +105,12 @@ class BaseClient {
             print("➡️ Headers: \(request.allHTTPHeaderFields ?? [:])")
             print("➡️ Body: \(json)")
         }
+    }
+
+    private func makeURL(endpoint: String) -> URL? {
+        let normalizedBase = baseURL.hasSuffix("/") ? baseURL : "\(baseURL)/"
+        let normalizedEndpoint = endpoint.hasPrefix("/") ? String(endpoint.dropFirst()) : endpoint
+        return URL(string: normalizedBase + normalizedEndpoint)
     }
 }
 
