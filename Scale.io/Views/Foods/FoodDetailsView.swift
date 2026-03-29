@@ -19,7 +19,7 @@ struct FoodDetailsView: View {
                 .padding(.top)
             MacrosGrid(food: f)
             if action {
-                CustomButton(text: "Add Food") {
+                CustomButton("Add Food") {
                     Task { await register() }
                     dismiss()
                 }

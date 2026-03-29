@@ -61,10 +61,10 @@ struct ScaleControlsView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CustomButton(text: "Tare", color: .cyan) {}
+            CustomButton("Tare", color: .cyan) {}
                 .padding()
 
-            CustomButton(text: "Unit") {
+            CustomButton("Unit") {
                 m = m.next
             }
             .padding()

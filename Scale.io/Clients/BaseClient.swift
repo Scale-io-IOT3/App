@@ -4,6 +4,7 @@ enum HTTPError: Error {
     case invalidURL
     case invalidResponse
     case invalidData
+    case serverError
     case statusCode(Int)
     case unknownError(Error)
 }
@@ -73,6 +74,9 @@ class BaseClient {
 
         guard (200...299).contains(httpResponse.statusCode) else {
             print("HTTP Error: \(httpResponse.statusCode)")
+            if (500...599).contains(httpResponse.statusCode) {
+                throw HTTPError.serverError
+            }
             throw HTTPError.statusCode(httpResponse.statusCode)
         }
     }

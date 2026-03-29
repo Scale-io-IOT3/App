@@ -5,7 +5,7 @@ class AuthClient {
     private init() {}
 
     func login(request: AuthRequest) async throws -> AuthResponse {
-        return try await post(request, debug: true)
+        return try await post(request)
     }
 
     func refresh(token: String) async throws -> AuthResponse {
@@ -21,5 +21,4 @@ class AuthClient {
             withAuth: false
         )
     }
-
 }

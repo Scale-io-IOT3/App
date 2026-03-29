@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Reusable blocks
 struct UsernameField: View {
     var name: String
     @Binding var value: String

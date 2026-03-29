@@ -4,7 +4,6 @@ struct AuthView: View {
     @State var username: String = ""
     @State var password: String = ""
     @EnvironmentObject var auth: AuthViewModel
-    @State var showError: Bool = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -27,18 +26,29 @@ struct AuthView: View {
             }
             .padding(.bottom, 12)
 
-            CustomButton(
-                text: "Sign In",
-                action: {
-                    Task {
-                        await auth.login(username: username, password: password)
-                        showError = !auth.isAuth()
+            CustomButton("Sign In") {
+                Task {
+                    await auth
+                        .login(
+                            username: username.trimmingCharacters(in: .whitespacesAndNewlines),
+                            password: password.trimmingCharacters(in: .whitespacesAndNewlines)
+                        )
+                }
+            }
+            .disabled(auth.isLoading)
+        }
+        .padding(.horizontal)
+        .alert(
+            "Oops...",
+            isPresented: Binding(
+                get: { auth.error != nil },
+                set: { visible in
+                    if !visible {
+                        auth.clearError()
                     }
                 }
             )
-        }
-        .padding(.horizontal)
-        .alert("Error", isPresented: $showError) {
+        ) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(auth.error ?? "Something went wrong")
@@ -48,4 +58,5 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
+        .environmentObject(AuthViewModel())
 }
