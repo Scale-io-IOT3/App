@@ -13,29 +13,16 @@ struct ScannerView: View {
     @State private var lastFailedAt: Date?
     @State private var rescanTask: Task<Void, Never>?
     private let retryCooldown: TimeInterval = 2
-    private let failedRescanDelay: TimeInterval = 1
+    private let failedRescanDelay: TimeInterval = 1.5
 
     private enum ScanFeedback {
         case info(String)
         case error(String)
 
-        var icon: String {
+        var state: ToastState {
             switch self {
-            case .info: return "info.circle"
-            case .error: return "exclamationmark.triangle"
-            }
-        }
-
-        var tint: Color {
-            switch self {
-            case .info: return .secondary
-            case .error: return .orange
-            }
-        }
-
-        var message: String {
-            switch self {
-            case .info(let message), .error(let message): return message
+            case .info(let message): return .info(message)
+            case .error(let message): return .error(message)
             }
         }
     }
@@ -63,29 +50,16 @@ struct ScannerView: View {
     private var bottomOverlay: some View {
         VStack(spacing: 10) {
             if isFetching {
-                HStack(spacing: 10) {
-                    ProgressView()
-                        .controlSize(.regular)
-                    Text("Fetching food details...")
-                        .font(.footnote.weight(.semibold))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .appCard(cornerRadius: 14, padding: 14)
+                Toast(
+                    state: .loading("Fetching food details..."),
+                    persist: true
+                )
             }
 
             if let feedback {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: feedback.icon)
-                        .foregroundStyle(feedback.tint)
-                        .font(.subheadline)
-                        .padding(.top, 1)
-
-                    Text(feedback.message)
-                        .font(.footnote)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                Toast(state: feedback.state) {
+                    self.feedback = nil
                 }
-                .appCard(cornerRadius: 14, padding: 14)
             }
         }
         .padding(.horizontal, 16)
@@ -102,7 +76,8 @@ struct ScannerView: View {
                 Date().timeIntervalSince(lastFailedAt) < retryCooldown
             {
                 feedback = .info(
-                    "Already tried this barcode. Move away and retry in a few seconds.")
+                    "Already tried this barcode. Move away and retry in a few seconds."
+                )
                 scheduleRescan()
                 shouldSkip = true
                 return
@@ -152,4 +127,20 @@ struct ScannerView: View {
             }
         }
     }
+}
+
+#Preview {
+    @Previewable @State var foods: [Food] = []
+    @Previewable @State var present: Bool = false
+    @Previewable @State var start: Bool = false
+
+    ScannerView(
+        foods: $foods,
+        presentSheet: $present,
+        startScanning: $start,
+        fetch: { query in
+            return []
+        },
+    )
+    .environmentObject(FoodViewModel())
 }

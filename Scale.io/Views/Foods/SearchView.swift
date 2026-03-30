@@ -12,30 +12,33 @@ struct SearchView: View {
     private let searchDelay: UInt64 = 700_000_000
 
     var body: some View {
-        FoodListView(foods: $foods, presentSheet: $presentSheet)
-            .overlay(overlayView)
-            .searchable(text: $search, prompt: "Search foods or brands")
-            .task(id: search) { await searchTask() }
-            .task(id: bluetooth.weight) {
-                guard !search.isEmpty else { return }
-                await fetchFoods()
-            }
+        ZStack(alignment: .bottom) {
+            FoodListView(foods: $foods, presentSheet: $presentSheet)
+                .searchable(text: $search, prompt: "Search foods or brands")
+                .task(id: search) { await searchTask() }
+                .task(id: bluetooth.weight) {
+                    guard !search.isEmpty else { return }
+                    await fetchFoods()
+                }
 
+            overlay
+        }
     }
 
     @ViewBuilder
-    private var overlayView: some View {
-        if isLoading {
-            VStack(spacing: 10) {
-                ProgressView().controlSize(.large)
-                Text("Searching...")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+    private var overlay: some View {
+        VStack(spacing: 10) {
+            if isLoading {
+                Toast(
+                    state: .loading("Searching..."),
+                    persist: true
+                )
+            } else if foods.isEmpty {
+                emptyStateView
             }
-            .appCard(cornerRadius: 14, padding: 18)
-        } else if foods.isEmpty {
-            emptyStateView
         }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 10)
     }
 
     @ViewBuilder
