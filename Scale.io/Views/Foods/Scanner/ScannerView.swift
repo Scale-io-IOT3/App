@@ -2,30 +2,18 @@ import SwiftUI
 
 struct ScannerView: View {
     @EnvironmentObject private var foodVm: FoodViewModel
+    @EnvironmentObject private var toast: ToastViewModel
     @Binding var foods: [Food]
     @Binding var presentSheet: Bool
     @Binding var startScanning: Bool
+    var key: String = ToastKey.global
     var fetch: (_ query: String) async -> [Food]
 
-    @State private var isFetching: Bool = false
-    @State private var feedback: ScanFeedback?
     @State private var lastFailedCode: String?
     @State private var lastFailedAt: Date?
     @State private var rescanTask: Task<Void, Never>?
     private let retryCooldown: TimeInterval = 2
     private let failedRescanDelay: TimeInterval = 1.5
-
-    private enum ScanFeedback {
-        case info(String)
-        case error(String)
-
-        var state: ToastState {
-            switch self {
-            case .info(let message): return .info(message)
-            case .error(let message): return .error(message)
-            }
-        }
-    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -36,34 +24,11 @@ struct ScannerView: View {
                 }
             )
             .ignoresSafeArea()
-
-            bottomOverlay
         }
-        .animation(.easeInOut(duration: 0.2), value: isFetching)
-        .animation(.easeInOut(duration: 0.2), value: feedback != nil)
         .onDisappear {
             rescanTask?.cancel()
+            toast.clear(key: key)
         }
-    }
-
-    @ViewBuilder
-    private var bottomOverlay: some View {
-        VStack(spacing: 10) {
-            if isFetching {
-                Toast(
-                    state: .loading("Fetching food details..."),
-                    persist: true
-                )
-            }
-
-            if let feedback {
-                Toast(state: feedback.state) {
-                    self.feedback = nil
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 10)
     }
 
     private func fetchFromScan(code: String) async {
@@ -75,26 +40,30 @@ struct ScannerView: View {
                 lastFailedCode == code,
                 Date().timeIntervalSince(lastFailedAt) < retryCooldown
             {
-                feedback = .info(
-                    "Already tried this barcode. Move away and retry in a few seconds."
+                toast.show(
+                    .info("Already tried this barcode. Move away and retry in a few seconds."),
+                    key: key
                 )
                 scheduleRescan()
                 shouldSkip = true
                 return
             }
 
-            isFetching = true
-            feedback = nil
+            toast.show(
+                .loading("Fetching food details..."),
+                key: key,
+                persist: true
+            )
         }
         guard !shouldSkip else { return }
 
         let results = await fetch(code)
 
         await MainActor.run {
-            isFetching = false
             foods = results
 
             if let selectedFood = results.first {
+                toast.clear(key: key)
                 lastFailedCode = nil
                 lastFailedAt = nil
                 foodVm.selected = selectedFood
@@ -104,9 +73,12 @@ struct ScannerView: View {
 
             let fallbackMessage = "No food matched this barcode. Try another item."
             if let error = foodVm.lastFetchError, !error.isEmpty {
-                feedback = .error("Couldn't fetch this barcode. \(error)")
+                toast.show(
+                    .error("Couldn't fetch this barcode. \(error)"),
+                    key: key
+                )
             } else {
-                feedback = .info(fallbackMessage)
+                toast.show(.info(fallbackMessage), key: key)
             }
 
             lastFailedCode = code
@@ -138,9 +110,11 @@ struct ScannerView: View {
         foods: $foods,
         presentSheet: $present,
         startScanning: $start,
+        key: ToastKey.add,
         fetch: { query in
             return []
         },
     )
     .environmentObject(FoodViewModel())
+    .environmentObject(ToastViewModel())
 }

@@ -94,24 +94,42 @@ struct Toast: View {
     }
 }
 
-#Preview("Animate") {
-    Toast(state: .error("Couldn't fetch this barcode."))
-    Toast(state: .success("Food saved successfully."))
-    Toast(state: .info("Move closer to scan the barcode."))
-    Toast(state: .warning("Weight is unstable, try again."))
-    Toast(
-        state: .success("Short timeout toast."),
-        timeout: 1.2
-    )
+#Preview("Animated") {
+    VStack(spacing: 10) {
+        Toast(state: .error("Couldn't fetch this barcode."))
+        Toast(state: .success("Food saved successfully."))
+        Toast(state: .info("Move closer to scan the barcode."))
+        Toast(state: .warning("Weight is unstable, try again."))
+        Toast(
+            state: .custom(
+                message: "Custom feedback with your own icon and color.",
+                icon: "sparkles",
+                tint: .blue
+            ),
+        )
+    }
+    .padding(16)
+
 }
 
 #Preview {
     VStack(spacing: 10) {
         Toast(
-            state: .loading("Fetching food details..."),
+            state: .error("Couldn't fetch this barcode."),
             persist: true
         )
-
+        Toast(
+            state: .success("Food saved successfully."),
+            persist: true
+        )
+        Toast(
+            state: .info("Move closer to scan the barcode."),
+            persist: true
+        )
+        Toast(
+            state: .warning("Weight is unstable, try again."),
+            persist: true
+        )
         Toast(
             state: .custom(
                 message: "Custom feedback with your own icon and color.",
@@ -120,11 +138,6 @@ struct Toast: View {
             ),
             persist: true
         )
-        Toast(
-            state: .info("Persistent info toast."),
-            persist: true
-        )
-
     }
     .padding(16)
 }

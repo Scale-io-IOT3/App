@@ -13,6 +13,14 @@ enum TabRepresentation: String, CaseIterable, Hashable {
         }
     }
 
+    private var toastKey: String {
+        switch self {
+        case .dashboard: return ToastKey.dashboard
+        case .add: return ToastKey.add
+        case .scale: return ToastKey.scale
+        }
+    }
+
     @ViewBuilder
     private var content: some View {
         switch self {
@@ -28,12 +36,10 @@ enum TabRepresentation: String, CaseIterable, Hashable {
     @ViewBuilder
     public var view: some View {
         NavigationStack {
-            content
+            ZStack(alignment: .bottom) {
+                content
+                ToastStack(key: toastKey)
+            }
         }
-        .tabItem {
-            Label(rawValue.capitalized, systemImage: systemImage)
-        }
-        .tag(self)
     }
-
 }

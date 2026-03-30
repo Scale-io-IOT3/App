@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ScaleManager: View {
+    var key: String = ToastKey.scale
     @EnvironmentObject var vm: BluetoothViewModel
     @State var m: Measurement = .grams
     var connected: Bool { vm.connectedScale != nil }

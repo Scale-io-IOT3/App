@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum ToastState {
+enum ToastState: Equatable {
     case loading(String)
     case error(String)
     case success(String)

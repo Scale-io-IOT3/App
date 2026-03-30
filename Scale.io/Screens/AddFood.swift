@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AddFood: View {
+    var key: String = ToastKey.add
     @State private var selectedMode: EntryMode = .search
     @EnvironmentObject var food: FoodViewModel
     @EnvironmentObject var bluetooth: BluetoothViewModel
@@ -90,16 +91,33 @@ struct AddFood: View {
                 foods: $foods,
                 presentSheet: $presentSheet,
                 isLoading: $isLoading,
-                search: $searchText
+                search: $searchText,
+                key: key
             ) { query in
                 await food.getFreshFood(food: query, quantity: bluetooth.weight)
             }
 
         case .scan:
-            ScannerView(foods: $foods, presentSheet: $presentSheet, startScanning: $startScanning) { query in
+            ScannerView(
+                foods: $foods,
+                presentSheet: $presentSheet,
+                startScanning: $startScanning,
+                key: key
+            ) { query in
                 await food.getProduct(food: query, quantity: bluetooth.weight)
             }
             .environment(\.colorScheme, .dark)
         }
     }
+}
+
+#Preview {
+    NavigationStack {
+        AddFood()
+    }
+    .environmentObject(FoodViewModel())
+    .environmentObject(BluetoothViewModel())
+    .environmentObject(MealsViewModel())
+    .environmentObject(HealthViewModel())
+    .environmentObject(ToastViewModel())
 }

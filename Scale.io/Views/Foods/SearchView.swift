@@ -3,42 +3,35 @@ import SwiftUI
 struct SearchView: View {
     @EnvironmentObject private var foodVm: FoodViewModel
     @EnvironmentObject private var bluetooth: BluetoothViewModel
+    @EnvironmentObject private var toastVm: ToastViewModel
     @Binding var foods: [Food]
     @Binding var presentSheet: Bool
     @Binding var isLoading: Bool
     @Binding var search: String
 
+    var key: String
     var fetch: (_ query: String) async -> [Food]
     private let searchDelay: UInt64 = 700_000_000
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            FoodListView(foods: $foods, presentSheet: $presentSheet)
-                .searchable(text: $search, prompt: "Search foods or brands")
-                .task(id: search) { await searchTask() }
-                .task(id: bluetooth.weight) {
-                    guard !search.isEmpty else { return }
-                    await fetchFoods()
-                }
-
-            overlay
-        }
+        FoodListView(foods: $foods, presentSheet: $presentSheet)
+            .overlay(overlay)
+            .searchable(text: $search, prompt: "Search foods or brands")
+            .task(id: search) { await searchTask() }
+            .task(id: bluetooth.weight) {
+                guard !search.isEmpty else { return }
+                await fetchFoods()
+            }
+            .onDisappear {
+                toastVm.clear(key: key)
+            }
     }
 
     @ViewBuilder
     private var overlay: some View {
-        VStack(spacing: 10) {
-            if isLoading {
-                Toast(
-                    state: .loading("Searching..."),
-                    persist: true
-                )
-            } else if foods.isEmpty {
-                emptyStateView
-            }
+        if !isLoading && foods.isEmpty {
+            emptyStateView
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 10)
     }
 
     @ViewBuilder
@@ -54,6 +47,7 @@ struct SearchView: View {
         guard !search.isEmpty else {
             isLoading = false
             foods = []
+            toastVm.clear(key: key)
             return
         }
 
@@ -65,7 +59,11 @@ struct SearchView: View {
 
     private func fetchFoods() async {
         isLoading = true
-        defer { isLoading = false }
+        toastVm.show(.loading("Searching..."), key: key, persist: true)
+        defer {
+            isLoading = false
+            toastVm.clear(key: key)
+        }
 
         let results = await fetch(search)
         foods = results
@@ -80,8 +78,4 @@ struct StartSearch: View {
             description: Text("Start typing to search products and fresh foods.")
         )
     }
-}
-
-#Preview {
-    StartSearch()
 }

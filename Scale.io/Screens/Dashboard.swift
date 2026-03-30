@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct Dashboard: View {
+    var key = ToastKey.dashboard
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
     @EnvironmentObject var food: FoodViewModel
