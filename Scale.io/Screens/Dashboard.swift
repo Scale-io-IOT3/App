@@ -5,7 +5,6 @@ struct Dashboard: View {
     @EnvironmentObject var meal: MealsViewModel
     @EnvironmentObject var food: FoodViewModel
     @EnvironmentObject var bluetooth: BluetoothViewModel
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var goal: Int {
         max(Int(health.BMR ?? 1200), 1)

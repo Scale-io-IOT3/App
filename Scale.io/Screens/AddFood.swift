@@ -18,29 +18,18 @@ struct AddFood: View {
     }
 
     var body: some View {
-        ZStack {
-            contentView
-                .environmentObject(food)
-                .environmentObject(bluetooth)
-                .navigationTitle(selectedMode.rawValue.capitalized)
-
-            VStack {
+        contentView
+            .environmentObject(food)
+            .environmentObject(bluetooth)
+            .navigationTitle("Add Food")
+            .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top) {
                 if foods.isEmpty {
-                    Picker("Mode", selection: $selectedMode) {
-                        ForEach(EntryMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue.capitalized).tag(mode)
-                        }
-                    }
-                    .glassEffect(.regular)
-                    .pickerStyle(.segmented)
-                    .padding()
-                    .onChange(of: selectedMode) {
-                        resetState(for: selectedMode)
-                    }
+                    modePickerCard
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
                 }
-                Spacer()
             }
-        }
         .navigationDestination(isPresented: $redirect) { TodayFoodsView() }
         .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
             FoodDetailsView(food: food.selected) {
@@ -52,6 +41,25 @@ struct AddFood: View {
             }
             .resize()
         }
+    }
+
+    private var modePickerCard: some View {
+        VStack(spacing: 0) {
+            Picker("Mode", selection: $selectedMode) {
+                ForEach(EntryMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue.capitalized).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: selectedMode) {
+                resetState(for: selectedMode)
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 
     private func resetState(for mode: EntryMode) {
@@ -92,7 +100,6 @@ struct AddFood: View {
                 await food.getProduct(food: query, quantity: bluetooth.weight)
             }
             .environment(\.colorScheme, .dark)
-            .ignoresSafeArea()
         }
     }
 }

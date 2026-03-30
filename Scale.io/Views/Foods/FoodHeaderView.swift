@@ -3,19 +3,30 @@ import SwiftUI
 
 struct FoodHeaderView: View {
     let food: Food
+
     var body: some View {
         HStack(spacing: 24) {
-            MacrosChartView(food: food)
-            VStack(alignment: .leading) {
+            MacrosChartView(food: food, size: 110)
+            VStack(alignment: .leading, spacing: 8) {
                 Text(food.name)
                     .font(.title3)
                     .fontWeight(.semibold)
+                    .lineLimit(2)
 
-                Text(food.brands)
-                    .font(.headline)
+                if !food.brands.isEmpty {
+                    Text(food.brands)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+
+                Text("Serving: \(food.quantity.formatted(.number.precision(.fractionLength(0)))) g")
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .appCard(cornerRadius: 18, padding: 16)
     }
 }
 

@@ -5,7 +5,19 @@ class FoodsClient {
     private init() {}
     
     func fetch(_ request : FoodRequest) async throws -> FoodResponse {
-        let endpoint = "\(request.endpoint)/\(request.query)?grams=\(request.grams)"
+        let encodedQuery = request.query
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .addingPercentEncoding(withAllowedCharacters: .urlPathSegmentAllowed)
+            ?? request.query
+        let endpoint = "\(request.endpoint)/\(encodedQuery)?grams=\(request.grams)"
         return try await BaseClient.shared.get(endpoint: endpoint)
     }
+}
+
+private extension CharacterSet {
+    static let urlPathSegmentAllowed: CharacterSet = {
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: "-._~")
+        return allowed
+    }()
 }

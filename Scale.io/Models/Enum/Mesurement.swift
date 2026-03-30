@@ -26,5 +26,4 @@ enum Measurement: String, CaseIterable {
         let grams = value * from.toGramsFactor
         return grams / to.toGramsFactor
     }
-
 }

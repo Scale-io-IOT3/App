@@ -13,11 +13,10 @@ struct FoodListView: View {
                     presentSheet = true
                 } label: {
                     FoodRowView(food: food)
-                        .padding(.vertical, 10)
-                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .listRowSeparator(.automatic)
+                .listRowBackground(Color.clear)
             }
         }
         .scrollDismissesKeyboard(.immediately)
@@ -30,21 +29,31 @@ struct FoodRowView: View {
     let food: Food
 
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(food.name)
-                    .font(.headline)
+                    .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
                 Text(food.brands)
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
 
             Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("\(food.macros.calories) kcal")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
+        .padding(.vertical, 6)
     }
 }

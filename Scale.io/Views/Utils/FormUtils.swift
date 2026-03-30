@@ -4,15 +4,15 @@ struct FieldBackground: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(Color(.secondarySystemBackground))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.primary.opacity(0.10), lineWidth: 1)
             )
     }
 }
@@ -38,6 +38,8 @@ struct IconTextField: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: systemImage)
+                .foregroundStyle(.accent)
+                .frame(width: 18)
             
             Group {
                 if isSecure && secureEntryEnabled {
@@ -51,7 +53,7 @@ struct IconTextField: View {
             .autocorrectionDisabled(true)
             .textInputAutocapitalization(.never)
             .submitLabel(.done)
-            .fontWeight(.semibold)
+            .font(.subheadline.weight(.semibold))
             
             if isSecure {
                 Button {
@@ -64,7 +66,6 @@ struct IconTextField: View {
             }
         }
         .fieldBackground()
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(name))
+        .accessibilityElement(children: .contain)
     }
 }

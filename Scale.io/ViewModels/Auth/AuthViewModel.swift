@@ -50,7 +50,7 @@ class AuthViewModel: ObservableObject {
             state = .authenticated
         } catch {
             state = .unauthenticated
-            self.error = generateError(from: error)
+            self.error = error.userMessage(context: .auth)
         }
     }
 
@@ -62,37 +62,5 @@ class AuthViewModel: ObservableObject {
 
     func clearError() {
         error = nil
-    }
-
-    private func generateError(from error: Error) -> String {
-        if let urlError = error as? URLError {
-            switch urlError.code {
-            case .notConnectedToInternet, .networkConnectionLost:
-                return "No internet connection. Please check your network and try again."
-            case .cannotConnectToHost, .cannotFindHost, .timedOut:
-                return "Unable to reach the server right now. Please try again."
-            default:
-                break
-            }
-        }
-
-        if let httpError = error as? HTTPError {
-            switch httpError {
-            case .statusCode(401), .statusCode(403):
-                return "Invalid credentials. Please check your username and password."
-            case .serverError, .invalidResponse, .invalidData:
-                return "Something went wrong. Please try again in a moment."
-            case .unknownError(let underlying):
-                return underlying.localizedDescription
-            default:
-                break
-            }
-        }
-
-        let fallback = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-        if fallback.isEmpty || fallback == "The operation couldn't be completed." {
-            return "Login failed. Please try again."
-        }
-        return fallback
     }
 }

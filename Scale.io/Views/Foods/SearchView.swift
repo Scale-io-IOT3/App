@@ -14,7 +14,7 @@ struct SearchView: View {
     var body: some View {
         FoodListView(foods: $foods, presentSheet: $presentSheet)
             .overlay(overlayView)
-            .searchable(text: $search)
+            .searchable(text: $search, prompt: "Search foods or brands")
             .task(id: search) { await searchTask() }
             .task(id: bluetooth.weight) {
                 guard !search.isEmpty else { return }
@@ -26,7 +26,13 @@ struct SearchView: View {
     @ViewBuilder
     private var overlayView: some View {
         if isLoading {
-            ProgressView().controlSize(.extraLarge)
+            VStack(spacing: 10) {
+                ProgressView().controlSize(.large)
+                Text("Searching...")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .appCard(cornerRadius: 14, padding: 18)
         } else if foods.isEmpty {
             emptyStateView
         }
@@ -66,9 +72,9 @@ struct SearchView: View {
 struct StartSearch: View {
     var body: some View {
         ContentUnavailableView(
-            "Let’s find something delicious.",
-            systemImage: "carrot.fill",
-            description: Text("Start typing to explore tasty options.")
+            "Find a food",
+            systemImage: "magnifyingglass",
+            description: Text("Start typing to search products and fresh foods.")
         )
     }
 }

@@ -1,14 +1,5 @@
 import Foundation
 
-enum HTTPError: Error {
-    case invalidURL
-    case invalidResponse
-    case invalidData
-    case serverError
-    case statusCode(Int)
-    case unknownError(Error)
-}
-
 struct EmptyBody: Encodable {}
 
 class BaseClient {

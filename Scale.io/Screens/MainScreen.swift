@@ -16,7 +16,7 @@ struct MainScreen: View {
         .environmentObject(food)
         .environmentObject(meals)
         .environmentObject(health)
-        .tabViewStyle(.sidebarAdaptable)
+        .tabViewStyle(.automatic)
     }
 }
 
