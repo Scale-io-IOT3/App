@@ -8,12 +8,10 @@ struct FoodDetailsView: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 18) {
-                view
-            }
-            .padding(16)
+        VStack(alignment: .leading, spacing: 18) {
+            view
         }
+        .padding(16)
     }
 
     @ViewBuilder private var view: some View {
@@ -26,8 +24,6 @@ struct FoodDetailsView: View {
                     dismiss()
                 }
             }
-        } else {
-            ContentUnavailableView("Hmm… nothing popped up.", systemImage: "carrot.fill")
         }
     }
 }
