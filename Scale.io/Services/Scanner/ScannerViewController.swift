@@ -9,6 +9,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     var preview: AVCaptureVideoPreviewLayer!
     private var scannerFrameView: UIView!
     private var scanningLine: UIView!
+    private var permissionOverlayView: UIView?
     private var isHandlingCode: Bool = false
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .portrait }
@@ -16,22 +17,74 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
+        handleCameraAuthorizationStatus()
+    }
+
+    private func handleCameraAuthorizationStatus() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            hidePermissionOverlay()
+            setupScannerSessionIfNeeded()
+
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    if granted {
+                        self.hidePermissionOverlay()
+                        self.setupScannerSessionIfNeeded()
+                    } else {
+                        self.showPermissionOverlay(
+                            title: "Camera access needed",
+                            message: "Allow camera access in Settings to scan barcodes.",
+                            showSettingsButton: true
+                        )
+                    }
+                }
+            }
+
+        case .denied, .restricted:
+            sessionQueue.async { [weak self] in
+                guard let session = self?.session, session.isRunning else { return }
+                session.stopRunning()
+            }
+            showPermissionOverlay(
+                title: "Camera Access Needed",
+                message: "Allow camera access in Settings to scan barcodes.",
+                showSettingsButton: true
+            )
+
+        @unknown default:
+            showPermissionOverlay(
+                title: "Camera Unavailable",
+                message: "The camera is unavailable on this device right now.",
+                showSettingsButton: false
+            )
+        }
+    }
+
+    private func setupScannerSessionIfNeeded() {
+        guard session == nil else { return }
 
         session = AVCaptureSession()
         guard let device = AVCaptureDevice.default(for: .video),
             let input = try? AVCaptureDeviceInput(device: device),
             let session = session
-        else { return }
+        else {
+            failed(message: "Could not access the camera.")
+            return
+        }
 
         guard session.canAddInput(input) else {
-            failed()
+            failed(message: "Could not connect camera input.")
             return
         }
         session.addInput(input)
 
         let output = AVCaptureMetadataOutput()
         guard session.canAddOutput(output) else {
-            failed()
+            failed(message: "Could not read barcode metadata from the camera.")
             return
         }
         session.addOutput(output)
@@ -45,6 +98,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     }
 
     func restartScanning() {
+        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { return }
         isHandlingCode = false
         sessionQueue.async { [weak self] in
             guard let session = self?.session, !session.isRunning else { return }
@@ -52,19 +106,20 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         }
     }
 
-    private func failed() {
-        let ac = UIAlertController(
-            title: "Scanning not supported",
-            message: "Your device does not support scanning.",
-            preferredStyle: .alert
+    private func failed(message: String) {
+        showPermissionOverlay(
+            title: "Scanner Unavailable",
+            message: message,
+            showSettingsButton: false
         )
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
         session = nil
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        handleCameraAuthorizationStatus()
+
+        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { return }
         sessionQueue.async { [weak self] in
             guard let session = self?.session, !session.isRunning else { return }
             session.startRunning()
@@ -104,7 +159,8 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     }
 
     private func _preview() {
-        preview = AVCaptureVideoPreviewLayer(session: session!)
+        guard let session else { return }
+        preview = AVCaptureVideoPreviewLayer(session: session)
         preview.frame = view.layer.bounds
         preview.videoGravity = .resizeAspectFill
         view.layer.insertSublayer(preview, at: 0)
@@ -149,6 +205,88 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         addLine(x: size - lineWidth, y: size - lineLength, width: lineWidth, height: lineLength)
 
         scannerFrameView = frameView
+    }
+
+    private func showPermissionOverlay(title: String, message: String, showSettingsButton: Bool) {
+        permissionOverlayView?.removeFromSuperview()
+
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.95)
+        container.layer.cornerRadius = 16
+        container.layer.masksToBounds = true
+
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = title
+        titleLabel.font = .preferredFont(forTextStyle: .headline)
+        titleLabel.textColor = .label
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
+
+        let messageLabel = UILabel()
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        messageLabel.text = message
+        messageLabel.font = .preferredFont(forTextStyle: .subheadline)
+        messageLabel.textColor = .secondaryLabel
+        messageLabel.textAlignment = .center
+        messageLabel.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, messageLabel])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 10
+
+        container.addSubview(stack)
+
+        if showSettingsButton {
+            let button = UIButton(type: .system)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.setTitle("Open Settings", for: .normal)
+            button.titleLabel?.font = .preferredFont(forTextStyle: .subheadline)
+            button.addTarget(self, action: #selector(openAppSettings), for: .touchUpInside)
+            container.addSubview(button)
+
+            NSLayoutConstraint.activate([
+                stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
+                stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+                stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+                button.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 10),
+                button.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12),
+                button.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
+                stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+                stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+                stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
+            ])
+        }
+
+        view.addSubview(container)
+        NSLayoutConstraint.activate([
+            container.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            container.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            container.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
+            container.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24),
+        ])
+
+        permissionOverlayView = container
+    }
+
+    private func hidePermissionOverlay() {
+        permissionOverlayView?.removeFromSuperview()
+        permissionOverlayView = nil
+    }
+
+    @objc
+    private func openAppSettings() {
+        guard
+            let url = URL(string: UIApplication.openSettingsURLString),
+            UIApplication.shared.canOpenURL(url)
+        else { return }
+        UIApplication.shared.open(url)
     }
 
     override func viewDidLayoutSubviews() {
