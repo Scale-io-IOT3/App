@@ -7,6 +7,7 @@ struct AddFood: View {
     @EnvironmentObject var bluetooth: BluetoothViewModel
     @EnvironmentObject var meals: MealsViewModel
     @EnvironmentObject var health: HealthViewModel
+    @EnvironmentObject var toast: ToastViewModel
     @State private var foods: [Food] = []
     @State private var isLoading: Bool = false
     @State private var presentSheet: Bool = false
@@ -31,17 +32,27 @@ struct AddFood: View {
                         .padding(.top, 8)
                 }
             }
-        .navigationDestination(isPresented: $redirect) { TodayFoodsView() }
-        .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
-            FoodDetailsView(food: food.selected) {
-                resetState(for: selectedMode)
-                if await health.log(food.selected) {
-                    await register()
-                    await meals.getTodayFoods()
-                }
+            .navigationDestination(isPresented: $redirect) {
+                TodayFoodsView()
             }
-            .resize()
-        }
+            .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
+                FoodDetailsView(food: food.selected) {
+                    guard await health.log(food.selected) else {
+                        toast.show(.error("Unable to log food"), key)
+                        print("Food added successfully", key)
+                        return
+                    }
+
+                    await register()
+                    toast.show(.success("Food added successfully"), key)
+                    await meals.getTodayFoods()
+                    resetState(for: selectedMode)
+                }
+                .resize()
+            }
+            .onDisappear {
+                toast.clear(key)
+            }
     }
 
     private var modePickerCard: some View {
@@ -53,7 +64,7 @@ struct AddFood: View {
             }
             .pickerStyle(.segmented)
             .onChange(of: selectedMode) {
-                resetState(for: selectedMode)
+                resetState(for: selectedMode, true)
             }
         }
         .padding(10)
@@ -63,24 +74,25 @@ struct AddFood: View {
         )
     }
 
-    private func resetState(for mode: EntryMode) {
+    private func resetState(for mode: EntryMode, _ resetFoods: Bool = false) {
         startScanning = (mode == .scan)
-        foods = []
+        if resetFoods {
+            foods = []
+            searchText = ""
+        }
+
         isLoading = false
-        searchText = ""
     }
 
     private func register() async {
         if let selected = food.selected {
             await meals.create(using: selected)
-            redirect = true
         }
     }
 
     private func scannerReset() {
-        if self.selectedMode == .scan {
-            resetState(for: selectedMode)
-        }
+        guard selectedMode == .scan else { return }
+        resetState(for: selectedMode, true)
     }
 
     @ViewBuilder

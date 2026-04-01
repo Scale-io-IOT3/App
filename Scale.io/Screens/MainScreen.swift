@@ -17,13 +17,14 @@ struct MainScreen: View {
                     }
                     .tag(tab)
             }
+            .environmentObject(bluetooth)
+            .environmentObject(food)
+            .environmentObject(meals)
+            .environmentObject(health)
+            .environmentObject(toast)
+            .tabViewStyle(.automatic)
         }
-        .environmentObject(bluetooth)
-        .environmentObject(food)
-        .environmentObject(meals)
-        .environmentObject(health)
         .environmentObject(toast)
-        .tabViewStyle(.automatic)
     }
 }
 

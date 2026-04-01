@@ -27,7 +27,7 @@ struct ScannerView: View {
         }
         .onDisappear {
             rescanTask?.cancel()
-            toast.clear(key: key)
+            toast.clear(key)
         }
     }
 
@@ -42,7 +42,7 @@ struct ScannerView: View {
             {
                 toast.show(
                     .info("Already tried this barcode. Move away and retry in a few seconds."),
-                    key: key
+                    key
                 )
                 scheduleRescan()
                 shouldSkip = true
@@ -51,7 +51,7 @@ struct ScannerView: View {
 
             toast.show(
                 .loading("Fetching food details..."),
-                key: key,
+                key,
                 persist: true
             )
         }
@@ -63,7 +63,7 @@ struct ScannerView: View {
             foods = results
 
             if let selectedFood = results.first {
-                toast.clear(key: key)
+                toast.clear(key)
                 lastFailedCode = nil
                 lastFailedAt = nil
                 foodVm.selected = selectedFood
@@ -75,10 +75,10 @@ struct ScannerView: View {
             if let error = foodVm.lastFetchError, !error.isEmpty {
                 toast.show(
                     .error("Couldn't fetch this barcode. \(error)"),
-                    key: key
+                    key
                 )
             } else {
-                toast.show(.info(fallbackMessage), key: key)
+                toast.show(.info(fallbackMessage), key)
             }
 
             lastFailedCode = code

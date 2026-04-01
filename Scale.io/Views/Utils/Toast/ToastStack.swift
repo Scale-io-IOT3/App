@@ -21,7 +21,7 @@ struct ToastStack: View {
                 persist: presentation.persist,
                 timeout: presentation.timeout,
                 onDismiss: {
-                    vm.clear(key: key)
+                    vm.clear(key)
                 }
             )
         }

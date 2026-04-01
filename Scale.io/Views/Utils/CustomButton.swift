@@ -64,5 +64,5 @@ struct CustomButton: View {
 }
 
 #Preview {
-    CustomButton(action: {})
+    CustomButton {}
 }

@@ -29,7 +29,7 @@ class ToastViewModel: ObservableObject {
 
     func show(
         _ state: ToastState,
-        key: String = ToastKey.global,
+        _ key: String = ToastKey.global,
         persist: Bool = false,
         timeout: TimeInterval = 3
     ) {
@@ -40,7 +40,7 @@ class ToastViewModel: ObservableObject {
         )
     }
 
-    func clear(key: String = ToastKey.global) {
+    func clear(_ key: String = ToastKey.global) {
         storage.removeValue(forKey: key)
     }
 

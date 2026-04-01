@@ -4,8 +4,8 @@ import SwiftUI
 struct FoodDetailsView: View {
     let food: Food?
     var action: Bool = true
-    var register: () async -> Void = {}
-    @Environment(\.dismiss) var dismiss
+    var onRegister: () async -> Void = {}
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -20,7 +20,7 @@ struct FoodDetailsView: View {
             MacrosGrid(food: f)
             if action {
                 CustomButton("Add Food", icon: "plus") {
-                    Task { await register() }
+                    Task { await onRegister() }
                     dismiss()
                 }
             }
