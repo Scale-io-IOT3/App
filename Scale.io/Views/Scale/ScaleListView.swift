@@ -19,7 +19,7 @@ struct ScaleListView: View {
             ContentUnavailableView(
                 "No scale nearby",
                 systemImage: "antenna.radiowaves.left.and.right.slash",
-                description: Text("Turn your scale on and tap refresh in a few seconds.")
+                description: Text("Try restarting you scale")
             )
         }
     }
@@ -28,8 +28,9 @@ struct ScaleListView: View {
         ZStack {
             view
                 .environmentObject(vm)
+
             if vm.state == .connecting {
-                Progress()
+                ProgressCard("Connecting...")
             }
         }
         .navigationTitle("Available Scales")
@@ -84,28 +85,5 @@ private struct ScaleRow: View {
             .tint(isConnectedScale ? .gray : .accent)
             .disabled(isConnectedScale)
         }
-    }
-}
-
-private struct Progress: View {
-    @EnvironmentObject var vm: BluetoothViewModel
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.35)
-                .ignoresSafeArea()
-                .allowsHitTesting(true)
-
-            VStack(spacing: 10) {
-                ProgressView()
-                    .controlSize(.large)
-                Text("Connecting...")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .appCard(cornerRadius: 12, padding: 18)
-        }
-        .transition(.opacity)
-        .animation(.easeInOut, value: vm.state)
     }
 }

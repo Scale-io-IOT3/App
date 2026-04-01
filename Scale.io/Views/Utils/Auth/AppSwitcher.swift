@@ -7,15 +7,7 @@ struct AppSwitcher: View {
         ZStack {
             switch auth.state {
             case .loading:
-                VStack(spacing: 14) {
-                    ProgressView()
-                        .controlSize(.large)
-                    Text("Preparing your space...")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .appCard()
-                .padding(20)
+                ProgressCard("Preparing your space...")
 
             case .authenticated:
                 MainScreen()
