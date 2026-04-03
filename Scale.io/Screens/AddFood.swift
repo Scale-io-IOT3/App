@@ -68,10 +68,6 @@ struct AddFood: View {
             }
         }
         .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        )
     }
 
     private func resetState(for mode: EntryMode, _ resetFoods: Bool = false) {

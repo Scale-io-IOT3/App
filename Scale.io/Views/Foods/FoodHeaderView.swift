@@ -53,7 +53,10 @@ struct MacrosChartView: View {
         ]
     }
 
-    init(calories: Int, carbs: Double, proteins: Double, fat: Double, size: CGFloat = 100, show: Bool = false) {
+    init(
+        calories: Int, carbs: Double, proteins: Double, fat: Double, size: CGFloat = 100,
+        show: Bool = false
+    ) {
         self.size = size
         self.calories = calories
         self.carbs = carbs
@@ -67,9 +70,37 @@ struct MacrosChartView: View {
         ]
     }
 
+    private var chartData: [(m: MacrosColor, value: Double)] {
+        macros.map { macro in
+            let safeValue = macro.value.isFinite ? max(macro.value, 0) : 0
+            return (macro.m, safeValue)
+        }
+    }
+
+    private var hasRenderableData: Bool {
+        chartData.contains(where: { $0.value > 0 })
+    }
+
     var body: some View {
         ZStack {
-            Chart(macros, id: \.m.rawValue) { m in
+            MacrosChart()
+            if showCalories {
+                VStack(spacing: 2) {
+                    Text("\(self.calories)")
+                        .font(.system(size: size * 0.25, weight: .bold))
+                    Text("kcal")
+                        .font(.system(size: size * 0.1))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    @ViewBuilder
+    private func MacrosChart() -> some View {
+        if hasRenderableData {
+            Chart(chartData, id: \.m.rawValue) { m in
                 SectorMark(
                     angle: .value("Percentage", m.value),
                     innerRadius: .ratio(0.7),
@@ -83,17 +114,17 @@ struct MacrosChartView: View {
                 "Protein": MacrosColor.proteins.color,
             ])
             .chartLegend(.hidden)
+        } else {
+            ZStack {
+                Circle()
+                    .stroke(Color.secondary.opacity(0.25), lineWidth: size * 0.15)
 
-            if showCalories {
-                VStack(spacing: 2) {
-                    Text("\(self.calories)")
-                        .font(.system(size: size * 0.25, weight: .bold))
-                    Text("kcal")
-                        .font(.system(size: size * 0.1))
+                if !showCalories {
+                    Text("No data")
+                        .font(.system(size: max(size * 0.11, 10), weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
             }
         }
-        .frame(width: size, height: size)
     }
 }

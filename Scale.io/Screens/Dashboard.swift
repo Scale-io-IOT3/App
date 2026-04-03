@@ -24,26 +24,12 @@ struct Dashboard: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(spacing: 12) {
-                    DashboardHeroCard(
-                        score: intakeScore,
-                        consumed: consumed,
-                        goal: goal,
-                        foodsCount: meal.today.count
-                    )
+                    TodayRecap()
                     CaloriesLeft(consumed: consumed, goal: goal)
                 }
 
                 WeeklyCaloriesCard(meals: meal.meals, goal: goal)
-
                 MacrosBreakdown(calories: consumed)
-
-                NavigationLink {
-                    TodayFoodsView()
-                } label: {
-                    TodayCardView(foods: meal.today)
-                }
-                .buttonStyle(.plain)
-
                 LastLoggedFoodView()
                     .environmentObject(health)
                     .environmentObject(food)
@@ -65,6 +51,21 @@ struct Dashboard: View {
         await health.getDailyMacros()
     }
 
+    @ViewBuilder
+    private func TodayRecap() -> some View {
+        NavigationLink {
+            TodayFoodsView()
+        } label: {
+            DashboardHeroCard(
+                score: intakeScore,
+                consumed: consumed,
+                goal: goal,
+                foodsCount: meal.today.count
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens today's foods")
+    }
 }
 
 private struct DashboardHeroCard: View {
@@ -88,8 +89,15 @@ private struct DashboardHeroCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Today at a glance")
-                .font(.headline)
+            HStack {
+                Text("Today at a glance")
+                    .font(.headline)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+            }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("\(consumed)")
