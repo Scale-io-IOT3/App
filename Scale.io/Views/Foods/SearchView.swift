@@ -19,7 +19,11 @@ struct SearchView: View {
     var body: some View {
         FoodListView(foods: $foods, presentSheet: $presentSheet)
             .overlay(overlay)
-            .searchable(text: $search, prompt: "Search foods or brands")
+            .searchable(
+                text: $search,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search foods or brands"
+            )
             .task(id: search) { await searchTask() }
             .task(id: bluetooth.weight) { await weightTask() }
             .onDisappear {

@@ -4,8 +4,6 @@ struct Dashboard: View {
     var key = ToastKey.dashboard
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
-    @EnvironmentObject var food: FoodViewModel
-    @EnvironmentObject var bluetooth: BluetoothViewModel
 
     private var goal: Int {
         max(Int(health.BMR ?? 1200), 1)
@@ -31,9 +29,6 @@ struct Dashboard: View {
                 WeeklyCaloriesCard(meals: meal.meals, goal: goal)
                 MacrosBreakdown(calories: consumed)
                 LastLoggedFoodView()
-                    .environmentObject(health)
-                    .environmentObject(food)
-                    .environmentObject(bluetooth)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -179,6 +174,4 @@ private struct HeroPill: View {
     Dashboard()
         .environmentObject(MealsViewModel())
         .environmentObject(HealthViewModel())
-        .environmentObject(FoodViewModel())
-        .environmentObject(BluetoothViewModel())
 }

@@ -11,12 +11,9 @@ struct AppSwitcher: View {
 
             case .authenticated:
                 MainScreen()
-                    .transition(
-                        .asymmetric(
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        )
-                    )
+                    // Position-based transitions can misplace large navigation titles
+                    // on first render inside NavigationStack.
+                    .transition(.opacity)
 
             case .unauthenticated:
                 AuthView()

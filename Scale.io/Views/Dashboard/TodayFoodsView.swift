@@ -8,7 +8,8 @@ struct TodayFoodsView: View {
         guard !search.isEmpty else { return meal.today }
 
         return meal.today.filter {
-            $0.name.localizedCaseInsensitiveContains(search) || $0.brands.localizedCaseInsensitiveContains(search)
+            $0.name.localizedCaseInsensitiveContains(search)
+                || $0.brands.localizedCaseInsensitiveContains(search)
         }
     }
 
@@ -28,7 +29,7 @@ struct TodayFoodsView: View {
                     .padding(.top, 50)
                 } else {
                     ForEach(filteredFoods, id: \.id) { food in
-                        FoodCard(food: food)
+                        FoodCard(food: food, last: filteredFoods.last == food)
                     }
                 }
             }

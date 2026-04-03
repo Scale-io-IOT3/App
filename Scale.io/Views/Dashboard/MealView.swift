@@ -3,12 +3,13 @@ import SwiftUI
 struct FoodCard: View {
     let food: Food
     @State private var selected: Food? = nil
+    var last: Bool = false
 
     var body: some View {
         Button {
             selected = food
         } label: {
-            FoodCardContentView(food: food)
+            FoodCardContentView(food: food, last: last)
                 .background(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .fill(Color(.secondarySystemBackground))
@@ -24,10 +25,18 @@ struct FoodCard: View {
 
 private struct FoodCardContentView: View {
     let food: Food
+    let last: Bool
+
     var body: some View {
         HStack(spacing: 12) {
             MacrosChartView(food: food, size: 80)
             VStack(alignment: .leading, spacing: 4) {
+                if last {
+                    Label("Last Logged", systemImage: "clock.fill")
+                        .font(.caption.bold())
+                        .foregroundStyle(.accent)
+                }
+
                 Text(food.name)
                     .font(.subheadline)
                     .fontWeight(.semibold)

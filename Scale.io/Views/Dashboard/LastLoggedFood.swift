@@ -1,27 +1,15 @@
 import SwiftUI
 
 struct LastLoggedFoodView: View {
-    @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var meal: MealsViewModel
     @EnvironmentObject var food: FoodViewModel
-    @EnvironmentObject var bluetooth: BluetoothViewModel
+    @State private var presentSheet: Bool = false
 
     var body: some View {
-        if !meal.today.isEmpty {
-            FoodCard(food: meal.today.last!)
+        if let lastFood = meal.today.last {
+            FoodCard(food: lastFood, last: true)
         } else {
-            NavigationLink(
-                destination: {
-                    AddFood()
-                },
-                label: {
-                    NoLoggedFoodCard()
-                        .environmentObject(health)
-                        .environmentObject(food)
-                        .environmentObject(bluetooth)
-                }
-            )
-            .buttonStyle(.plain)
+            NoLoggedFoodCard()
         }
     }
 }
@@ -41,12 +29,6 @@ private struct NoLoggedFoodCard: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.secondary)
-
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

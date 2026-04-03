@@ -13,7 +13,6 @@ struct AddFood: View {
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
-    @State private var redirect = false
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -32,14 +31,10 @@ struct AddFood: View {
                         .padding(.top, 8)
                 }
             }
-            .navigationDestination(isPresented: $redirect) {
-                TodayFoodsView()
-            }
             .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
                 FoodDetailsView(food: food.selected) {
                     guard await health.log(food.selected) else {
                         toast.show(.error("Unable to log food"), key)
-                        print("Food added successfully", key)
                         return
                     }
 
