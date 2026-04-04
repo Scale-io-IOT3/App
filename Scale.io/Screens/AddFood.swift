@@ -4,7 +4,6 @@ struct AddFood: View {
     var key: String = ToastKey.add
     @State private var selectedMode: EntryMode = .search
     @EnvironmentObject var food: FoodViewModel
-    @EnvironmentObject var bluetooth: BluetoothViewModel
     @EnvironmentObject var meals: MealsViewModel
     @EnvironmentObject var health: HealthViewModel
     @EnvironmentObject var toast: ToastViewModel
@@ -13,6 +12,8 @@ struct AddFood: View {
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
+    private let defaultQueryServingInGrams: Double = 100
+
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -21,48 +22,49 @@ struct AddFood: View {
     var body: some View {
         contentView
             .environmentObject(food)
-            .environmentObject(bluetooth)
             .navigationTitle("Add Food")
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .top) {
                 if foods.isEmpty {
-                    modePickerCard
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
+                    modePickerHeader
                 }
             }
             .sheet(isPresented: $presentSheet, onDismiss: scannerReset) {
-                FoodDetailsView(food: food.selected) {
-                    guard await health.log(food.selected) else {
+                FoodDetailsView(food: food.selected) { selectedFood in
+                    guard await health.log(selectedFood) else {
                         toast.show(.error("Unable to log food"), key)
                         return
                     }
 
-                    await register()
+                    await meals.create(using: selectedFood)
                     toast.show(.success("Food added successfully"), key)
                     await meals.getTodayFoods()
                     resetState(for: selectedMode)
                 }
-                .resize()
+                .resizeWithAction()
             }
             .onDisappear {
                 toast.clear(key)
             }
     }
 
-    private var modePickerCard: some View {
-        VStack(spacing: 0) {
-            Picker("Mode", selection: $selectedMode) {
-                ForEach(EntryMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue.capitalized).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: selectedMode) {
-                resetState(for: selectedMode, true)
+    private var modePickerHeader: some View {
+        Picker("Mode", selection: $selectedMode) {
+            ForEach(EntryMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue.capitalized).tag(mode)
             }
         }
-        .padding(10)
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+        .background(Color(.systemBackground))
+        .overlay(alignment: .bottom) {
+            Divider()
+        }
+        .onChange(of: selectedMode) {
+            resetState(for: selectedMode, true)
+        }
     }
 
     private func resetState(for mode: EntryMode, _ resetFoods: Bool = false) {
@@ -73,12 +75,6 @@ struct AddFood: View {
         }
 
         isLoading = false
-    }
-
-    private func register() async {
-        if let selected = food.selected {
-            await meals.create(using: selected)
-        }
     }
 
     private func scannerReset() {
@@ -97,7 +93,7 @@ struct AddFood: View {
                 search: $searchText,
                 key: key
             ) { query in
-                await food.getFreshFood(food: query, quantity: bluetooth.weight)
+                await food.getFreshFood(food: query, quantity: defaultQueryServingInGrams)
             }
 
         case .scan:
@@ -107,7 +103,7 @@ struct AddFood: View {
                 startScanning: $startScanning,
                 key: key
             ) { query in
-                await food.getProduct(food: query, quantity: bluetooth.weight)
+                await food.getProduct(food: query, quantity: defaultQueryServingInGrams)
             }
             .environment(\.colorScheme, .dark)
         }
@@ -119,7 +115,6 @@ struct AddFood: View {
         AddFood()
     }
     .environmentObject(FoodViewModel())
-    .environmentObject(BluetoothViewModel())
     .environmentObject(MealsViewModel())
     .environmentObject(HealthViewModel())
     .environmentObject(ToastViewModel())

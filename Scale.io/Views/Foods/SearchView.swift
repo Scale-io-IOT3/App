@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SearchView: View {
     @EnvironmentObject private var foodVm: FoodViewModel
-    @EnvironmentObject private var bluetooth: BluetoothViewModel
     @EnvironmentObject private var toastVm: ToastViewModel
     @Binding var foods: [Food]
     @Binding var presentSheet: Bool
@@ -12,9 +11,6 @@ struct SearchView: View {
     var key: String
     var fetch: (_ query: String) async -> [Food]
     private let searchDelay: UInt64 = 700_000_000
-    private let weightRefetchDelay: UInt64 = 700_000_000
-    private let minimumWeightDelta: Double = 2
-    @State private var lastFetchedWeight: Double?
 
     var body: some View {
         FoodListView(foods: $foods, presentSheet: $presentSheet)
@@ -25,7 +21,6 @@ struct SearchView: View {
                 prompt: "Search foods or brands"
             )
             .task(id: search) { await searchTask() }
-            .task(id: bluetooth.weight) { await weightTask() }
             .onDisappear {
                 toastVm.clear(key)
             }
@@ -51,7 +46,6 @@ struct SearchView: View {
         guard !search.isEmpty else {
             isLoading = false
             foods = []
-            lastFetchedWeight = nil
             toastVm.clear(key)
             return
         }
@@ -62,30 +56,12 @@ struct SearchView: View {
         await fetchFoods()
     }
 
-    private func weightTask() async {
-        guard !search.isEmpty else { return }
-
-        let candidateWeight = bluetooth.weight
-        try? await Task.sleep(nanoseconds: weightRefetchDelay)
-        guard !Task.isCancelled else { return }
-
-        let stabilizedWeight = bluetooth.weight
-        guard abs(stabilizedWeight - candidateWeight) < 0.1 else { return }
-
-        if let lastFetchedWeight, abs(stabilizedWeight - lastFetchedWeight) < minimumWeightDelta {
-            return
-        }
-
-        await fetchFoods()
-    }
-
     private func fetchFoods() async {
         isLoading = true
         toastVm.show(.loading("Searching..."), key, persist: true)
         let results = await fetch(search)
         isLoading = false
         foods = results
-        lastFetchedWeight = bluetooth.weight
 
         if let error = foodVm.lastFetchError, !error.isEmpty {
             toastVm.show(.error(error), key)

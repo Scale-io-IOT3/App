@@ -14,12 +14,22 @@ enum Measurement: String, CaseIterable {
         case .milligrams: return 0.001
         }
     }
-    
+
     var next: Measurement {
         let all = Self.allCases
         let index = all.firstIndex(of: self)!
         let nextIndex = all.index(after: index)
         return nextIndex < all.endIndex ? all[nextIndex] : all.first!
+    }
+
+    var servingStep: Double {
+        switch self {
+        case .grams: return 5
+        case .ounces: return 0.5
+        case .kilos: return 0.05
+        case .pounds: return 0.1
+        case .milligrams: return 100
+        }
     }
 
     func convert(_ value: Double, from: Measurement = .grams, to: Measurement = .grams) -> Double {

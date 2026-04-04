@@ -20,7 +20,7 @@ struct FoodHeaderView: View {
                         .lineLimit(2)
                 }
 
-                Text("Serving: \(food.quantity.formatted(.number.precision(.fractionLength(0)))) g")
+                Text("Serving: \(food.getPortion()) g")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

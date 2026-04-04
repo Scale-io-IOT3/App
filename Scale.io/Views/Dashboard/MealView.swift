@@ -17,8 +17,8 @@ struct FoodCard: View {
         }
         .buttonStyle(.plain)
         .sheet(item: $selected) { food in
-            FoodDetailsView(food: food, action: false)
-                .resize()
+            FoodDetailsView(food: food)
+                .resizeWithoutAction()
         }
     }
 }

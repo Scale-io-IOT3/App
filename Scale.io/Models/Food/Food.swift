@@ -20,7 +20,7 @@ struct FoodDto: Codable {
 struct Nutriments: Codable {
     let energyKcalValueComputed, carbohydrates: Int
     let fat, proteins: Double
-    
+
     enum CodingKeys: String, CodingKey {
         case energyKcalValueComputed = "energy-kcal_value_computed"
         case carbohydrates
@@ -41,6 +41,35 @@ extension Food {
                 fat: self.macros.fat,
                 proteins: self.macros.proteins
             )
+        )
+    }
+
+    func getPortion() -> String {
+        return self.quantity.formatted(
+            .number.precision(.fractionLength(0))
+        )
+    }
+
+    func scaled(to quantityInGrams: Double) -> Food {
+        let safeQuantity = max(quantityInGrams, 0)
+        guard safeQuantity > 0 else { return self }
+
+        let baseline = quantity > 0 ? quantity : 100
+        let factor = safeQuantity / baseline
+
+        let scaledMacros = Macros(
+            calories: max(Int((Double(macros.calories) * factor).rounded()), 0),
+            carbohydrates: max(macros.carbohydrates * factor, 0),
+            fat: max(macros.fat * factor, 0),
+            proteins: max(macros.proteins * factor, 0),
+            percentages: macros.percentages
+        )
+
+        return Food(
+            name: name,
+            brands: brands,
+            quantity: safeQuantity,
+            macros: scaledMacros
         )
     }
 }

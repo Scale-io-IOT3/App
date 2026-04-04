@@ -7,6 +7,7 @@ struct Scale_ioApp: App {
         WindowGroup {
             AppSwitcher()
                 .environmentObject(auth)
+                .preferredColorScheme(.dark)
         }
     }
 }
