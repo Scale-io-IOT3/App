@@ -4,15 +4,14 @@ struct FoodDetailsView: View {
     let food: Food?
     var onRegister: ((_ food: Food) async -> Void)?
     @Environment(\.dismiss) private var dismiss
-    @State private var servingAmount: Double
-    @State private var servingMeasurement: Measurement = .grams
+    @State private var quantity: Double
+    @State private var measurement: Measurement = .grams
     @FocusState private var isServingFocused: Bool
-    private let servingUnits = Measurement.allCases
 
     init(food: Food?, onRegister: ((_ food: Food) async -> Void)? = nil) {
         self.food = food
         self.onRegister = onRegister
-        _servingAmount = State(initialValue: max(food?.quantity ?? 100, 1))
+        _quantity = State(initialValue: max(food?.quantity ?? 100, 1))
     }
 
     var body: some View {
@@ -58,20 +57,12 @@ struct FoodDetailsView: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                TextField(
-                    "Amount",
-                    value: $servingAmount,
-                    format: .number.precision(.fractionLength(0...1))
-                )
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 80)
-                .textFieldStyle(.roundedBorder)
-                .focused($isServingFocused)
+                amountField
 
-                Picker("Unit", selection: $servingMeasurement) {
-                    ForEach(servingUnits, id: \.self) { unit in
-                        Text(unit.rawValue).tag(unit)
+                Picker("Unit", selection: $measurement) {
+                    ForEach(Measurement.allCases, id: \.self) { unit in
+                        Text(unit.rawValue)
+                            .tag(unit)
                     }
                 }
                 .pickerStyle(.menu)
@@ -79,19 +70,40 @@ struct FoodDetailsView: View {
                 Spacer(minLength: 0)
 
                 Stepper(
-                    "", value: $servingAmount, in: 0...2500, step: servingMeasurement.servingStep
+                    "", value: $quantity, in: 0...2500, step: measurement.servingStep
                 )
                 .labelsHidden()
             }
         }
     }
 
+    private var amountField: some View {
+        TextField(
+            "Amount",
+            value: $quantity,
+            format: .number.precision(
+                .fractionLength(0...1)
+            )
+        )
+        .keyboardType(.decimalPad)
+        .multilineTextAlignment(.trailing)
+        .monospacedDigit()
+        .frame(width: 90)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .focused($isServingFocused)
+        .animation(.easeInOut(duration: 0.15), value: isServingFocused)
+    }
+
     private var servingInGrams: Double? {
-        let grams = servingAmount * servingMeasurement.toGramsFactor
+        let grams = quantity * measurement.toGramsFactor
         guard grams.isFinite, grams > 0 else { return nil }
         return grams
     }
-
 }
 
 #Preview {

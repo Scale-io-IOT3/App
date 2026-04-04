@@ -5,7 +5,8 @@ struct LastLoggedFoodView: View {
 
     var body: some View {
         if let lastFood = meal.today.last {
-            FoodCard(food: lastFood, tags: [.lastLogged])
+            FoodCard(food: lastFood)
+                .environmentObject(meal)
         } else {
             NoLoggedFoodCard()
         }

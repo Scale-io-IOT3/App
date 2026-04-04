@@ -30,9 +30,9 @@ struct FoodTag: View {
         case .firstLogged: return .teal
         case .lastLogged: return .blue
         case .mostCalories: return .orange
-        case .mostProtein: return .pink
-        case .mostCarbs: return .cyan
-        case .mostFat: return .yellow
+        case .mostProtein: return MacrosColor.proteins.color
+        case .mostCarbs: return MacrosColor.carbs.color
+        case .mostFat: return MacrosColor.fat.color
         }
     }
 

@@ -37,7 +37,7 @@ class MealsViewModel: ObservableObject {
             insights.append(.firstLogged)
         }
 
-        if today.last?.id == food.id {
+        if today.count > 1 && today.last?.id == food.id {
             insights.append(.lastLogged)
         }
 
@@ -90,5 +90,4 @@ class MealsViewModel: ObservableObject {
         guard let response = try? await service.fetch() else { return }
         self.meals = response
     }
-
 }

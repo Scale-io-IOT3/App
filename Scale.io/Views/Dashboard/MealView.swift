@@ -4,16 +4,20 @@ struct FoodCard: View {
     let food: Food
     @State private var selected: Food? = nil
     var tags: [FoodTagKind] = []
+    @EnvironmentObject var meal: MealsViewModel
 
     var body: some View {
         Button {
             selected = food
         } label: {
-            FoodCardContentView(food: food, tags: tags)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color(.secondarySystemBackground))
-                )
+            FoodCardContentView(
+                food: food,
+                tags: tags.count > 0 ? tags : meal.insights(for: food)
+            )
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
         }
         .buttonStyle(.plain)
         .sheet(item: $selected) { food in

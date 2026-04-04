@@ -67,10 +67,8 @@ struct TodayFoodsView: View {
                     .padding(.top, 50)
                 } else {
                     ForEach(sortedFoods, id: \.id) { food in
-                        FoodCard(
-                            food: food,
-                            tags: meal.insights(for: food)
-                        )
+                        FoodCard(food: food)
+                            .environmentObject(meal)
                     }
                 }
             }
@@ -78,29 +76,33 @@ struct TodayFoodsView: View {
             .navigationTitle("Today’s foods")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Section("Sort By") {
-                            Picker("Sort By", selection: $sort) {
-                                ForEach(SortOption.allCases) { option in
-                                    Text(option.rawValue).tag(option)
-                                }
-                            }
-                        }
-
-                        Section("Order") {
-                            Picker("Order", selection: $direction) {
-                                ForEach(SortDirection.allCases) { option in
-                                    Text(option.rawValue).tag(option)
-                                }
-                            }
-                        }
-                    } label: {
-                        Label("Sort", systemImage: "slider.horizontal.3")
-                    }
+                    menu
                 }
             }
         }
         .searchable(text: $search, prompt: "Search foods")
         .scrollDismissesKeyboard(.immediately)
+    }
+
+    private var menu: some View {
+        Menu {
+            Section("Sort By") {
+                Picker("Sort By", selection: $sort) {
+                    ForEach(SortOption.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+            }
+
+            Section("Order") {
+                Picker("Order", selection: $direction) {
+                    ForEach(SortDirection.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+            }
+        } label: {
+            Label("Sort", systemImage: "slider.horizontal.3")
+        }
     }
 }
