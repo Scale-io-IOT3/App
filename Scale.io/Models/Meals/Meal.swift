@@ -10,3 +10,10 @@ struct Meal: Codable {
         case foods
     }
 }
+
+extension [Meal] {
+    func today() -> [Meal] {
+        return self.filter { $0.createdAt.isToday() }
+            .sorted(by: { $0.createdAt < $1.createdAt })
+    }
+}

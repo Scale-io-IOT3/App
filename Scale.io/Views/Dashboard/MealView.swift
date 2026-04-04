@@ -3,8 +3,7 @@ import SwiftUI
 struct FoodCard: View {
     let food: Food
     @State private var selected: Food? = nil
-    var tags: [FoodTagKind] = []
-    @EnvironmentObject var meal: MealsViewModel
+    var tags: [FoodTagKind]? = nil
 
     var body: some View {
         Button {
@@ -12,7 +11,7 @@ struct FoodCard: View {
         } label: {
             FoodCardContentView(
                 food: food,
-                tags: tags.count > 0 ? tags : meal.insights(for: food)
+                tags: tags ?? food.tags
             )
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)

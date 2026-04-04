@@ -10,55 +10,9 @@ class MealsViewModel: ObservableObject {
         Dictionary(uniqueKeysWithValues: today.enumerated().map { ($0.element.id, $0.offset) })
     }
 
-    private var maxCalories: Int {
-        today.map(\.macros.calories).max() ?? 0
-    }
-
-    private var maxProteins: Double {
-        today.map(\.macros.proteins).max() ?? 0
-    }
-
-    private var maxQuantity: Double {
-        today.map(\.quantity).max() ?? 0
-    }
-
-    private var maxCarbs: Double {
-        today.map(\.macros.carbohydrates).max() ?? 0
-    }
-
-    private var maxFat: Double {
-        today.map(\.macros.fat).max() ?? 0
-    }
-
-    func insights(for food: Food) -> [FoodTagKind] {
-        var insights: [FoodTagKind] = []
-
-        if today.first?.id == food.id {
-            insights.append(.firstLogged)
-        }
-
-        if today.count > 1 && today.last?.id == food.id {
-            insights.append(.lastLogged)
-        }
-
-        if maxCalories > 0 && food.macros.calories == maxCalories {
-            insights.append(.mostCalories)
-        }
-
-        if maxProteins > 0 && food.macros.proteins == maxProteins {
-            insights.append(.mostProtein)
-        }
-
-
-        if maxCarbs > 0 && food.macros.carbohydrates == maxCarbs {
-            insights.append(.mostCarbs)
-        }
-
-        if maxFat > 0 && food.macros.fat == maxFat {
-            insights.append(.mostFat)
-        }
-
-        return insights
+    func setTags(_ tags: [FoodTagKind], for foodID: UUID) {
+        guard let index = today.firstIndex(where: { $0.id == foodID }) else { return }
+        today[index].tags = tags
     }
 
     func create(using foods: [Food]) async {
@@ -79,15 +33,36 @@ class MealsViewModel: ObservableObject {
 
     func getTodayFoods() async {
         await self.fetch()
-
-        let response = meals
-            .filter { $0.createdAt.isToday() }
-            .sorted(by: { $0.createdAt < $1.createdAt })
-        self.today = response.flatMap { $0.foods }
+        let foods = meals.today().flatMap(\.foods)
+        self.today = tagFoods(foods)
     }
 
     private func fetch() async {
         guard let response = try? await service.fetch() else { return }
         self.meals = response
+    }
+
+    private func tagFoods(_ foods: [Food]) -> [Food] {
+        guard !foods.isEmpty else { return [] }
+
+        let maxCalories = foods.map(\.macros.calories).max() ?? 0
+        let maxProteins = foods.map(\.macros.proteins).max() ?? 0
+        let maxCarbs = foods.map(\.macros.carbohydrates).max() ?? 0
+        let maxFat = foods.map(\.macros.fat).max() ?? 0
+        let firstID = foods.first?.id
+        let lastID = foods.count > 1 ? foods.last?.id : nil
+
+        return foods.map { food in
+            var tags: [FoodTagKind] = []
+            
+            if food.id == firstID { tags.append(.firstLogged) }
+            if let lastID, food.id == lastID { tags.append(.lastLogged) }
+            if maxCalories > 0 && food.macros.calories == maxCalories { tags.append(.mostCalories) }
+            if maxProteins > 0 && food.macros.proteins == maxProteins { tags.append(.mostProtein) }
+            if maxCarbs > 0 && food.macros.carbohydrates == maxCarbs { tags.append(.mostCarbs) }
+            if maxFat > 0 && food.macros.fat == maxFat { tags.append(.mostFat) }
+
+            return food.withTags(tags)
+        }
     }
 }

@@ -68,7 +68,6 @@ struct TodayFoodsView: View {
                 } else {
                     ForEach(sortedFoods, id: \.id) { food in
                         FoodCard(food: food)
-                            .environmentObject(meal)
                     }
                 }
             }

@@ -2,11 +2,14 @@ import SwiftUI
 
 struct LastLoggedFoodView: View {
     @EnvironmentObject var meal: MealsViewModel
-
     var body: some View {
+        content()
+    }
+
+    @ViewBuilder
+    private func content() -> some View {
         if let lastFood = meal.today.last {
             FoodCard(food: lastFood)
-                .environmentObject(meal)
         } else {
             NoLoggedFoodCard()
         }

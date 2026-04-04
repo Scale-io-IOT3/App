@@ -5,6 +5,7 @@ struct Food: Codable, Identifiable, Equatable {
     let name, brands: String
     let quantity: Double
     let macros: Macros
+    var tags: [FoodTagKind] = []
 
     enum CodingKeys: String, CodingKey {
         case name, brands, quantity, macros
@@ -69,7 +70,14 @@ extension Food {
             name: name,
             brands: brands,
             quantity: safeQuantity,
-            macros: scaledMacros
+            macros: scaledMacros,
+            tags: tags
         )
+    }
+
+    func withTags(_ tags: [FoodTagKind]) -> Food {
+        var copy = self
+        copy.tags = tags
+        return copy
     }
 }
