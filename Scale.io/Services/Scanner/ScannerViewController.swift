@@ -11,6 +11,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     private var scanningLine: UIView!
     private var permissionOverlayView: UIView?
     private var isHandlingCode: Bool = false
+    private var metadataOutput: AVCaptureMetadataOutput?
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .portrait }
     override var prefersStatusBarHidden: Bool { true }
@@ -88,6 +89,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
             return
         }
         session.addOutput(output)
+        metadataOutput = output
 
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [.ean13, .ean8, .upce]
@@ -165,8 +167,8 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         preview.videoGravity = .resizeAspectFill
         view.layer.insertSublayer(preview, at: 0)
 
-        let size: CGFloat = 160
-        let lineLength: CGFloat = 30
+        let size: CGFloat = 280
+        let cornerRadius: CGFloat = 16
         let lineWidth: CGFloat = 4
         let color = UIColor.systemMint
 
@@ -182,27 +184,84 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
             frameView.heightAnchor.constraint(equalToConstant: size),
         ])
 
-        func addLine(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
-            let line = UIView(frame: CGRect(x: x, y: y, width: width, height: height))
-            line.backgroundColor = color
-            frameView.addSubview(line)
+        let overlayView = UIView()
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        overlayView.isUserInteractionEnabled = false
+        view.insertSubview(overlayView, belowSubview: frameView)
+
+        NSLayoutConstraint.activate([
+            overlayView.topAnchor.constraint(equalTo: view.topAnchor),
+            overlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+
+        overlayView.layoutIfNeeded()
+        let maskLayer = CAShapeLayer()
+        let outerPath = UIBezierPath(rect: overlayView.bounds)
+        let innerRect = CGRect(
+            x: (overlayView.bounds.width - size) / 2,
+            y: (overlayView.bounds.height - size) / 2,
+            width: size,
+            height: size
+        )
+        let innerPath = UIBezierPath(roundedRect: innerRect, cornerRadius: cornerRadius)
+        outerPath.append(innerPath)
+        outerPath.usesEvenOddFillRule = true
+        maskLayer.path = outerPath.cgPath
+        maskLayer.fillRule = .evenOdd
+        overlayView.layer.mask = maskLayer
+
+        func addCorner(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat, cornerMask: Int) {
+            let path = UIBezierPath()
+            let cornerLength: CGFloat = 40
+
+            switch cornerMask {
+            case 0:
+                path.move(to: CGPoint(x: x, y: y + cornerLength))
+                path.addLine(to: CGPoint(x: x, y: y + cornerRadius))
+                path.addQuadCurve(
+                    to: CGPoint(x: x + cornerRadius, y: y), controlPoint: CGPoint(x: x, y: y))
+                path.addLine(to: CGPoint(x: x + cornerLength, y: y))
+            case 1:
+                path.move(to: CGPoint(x: x + width - cornerLength, y: y))
+                path.addLine(to: CGPoint(x: x + width - cornerRadius, y: y))
+                path.addQuadCurve(
+                    to: CGPoint(x: x + width, y: y + cornerRadius),
+                    controlPoint: CGPoint(x: x + width, y: y))
+                path.addLine(to: CGPoint(x: x + width, y: y + cornerLength))
+            case 2:
+                path.move(to: CGPoint(x: x, y: y + height - cornerLength))
+                path.addLine(to: CGPoint(x: x, y: y + height - cornerRadius))
+                path.addQuadCurve(
+                    to: CGPoint(x: x + cornerRadius, y: y + height),
+                    controlPoint: CGPoint(x: x, y: y + height))
+                path.addLine(to: CGPoint(x: x + cornerLength, y: y + height))
+            case 3:
+                path.move(to: CGPoint(x: x + width - cornerLength, y: y + height))
+                path.addLine(to: CGPoint(x: x + width - cornerRadius, y: y + height))
+                path.addQuadCurve(
+                    to: CGPoint(x: x + width, y: y + height - cornerRadius),
+                    controlPoint: CGPoint(x: x + width, y: y + height))
+                path.addLine(to: CGPoint(x: x + width, y: y + height - cornerLength))
+            default:
+                return
+            }
+
+            let shapeLayer = CAShapeLayer()
+            shapeLayer.path = path.cgPath
+            shapeLayer.strokeColor = color.cgColor
+            shapeLayer.fillColor = UIColor.clear.cgColor
+            shapeLayer.lineWidth = lineWidth
+            shapeLayer.lineCap = .round
+            frameView.layer.addSublayer(shapeLayer)
         }
 
-        // Top-left corner
-        addLine(x: 0, y: 0, width: lineLength, height: lineWidth)
-        addLine(x: 0, y: 0, width: lineWidth, height: lineLength)
-
-        // Top-right corner
-        addLine(x: size - lineLength, y: 0, width: lineLength, height: lineWidth)
-        addLine(x: size - lineWidth, y: 0, width: lineWidth, height: lineLength)
-
-        // Bottom-left corner
-        addLine(x: 0, y: size - lineWidth, width: lineLength, height: lineWidth)
-        addLine(x: 0, y: size - lineLength, width: lineWidth, height: lineLength)
-
-        // Bottom-right corner
-        addLine(x: size - lineLength, y: size - lineWidth, width: lineLength, height: lineWidth)
-        addLine(x: size - lineWidth, y: size - lineLength, width: lineWidth, height: lineLength)
+        addCorner(x: 0, y: 0, width: size, height: size, cornerMask: 0)
+        addCorner(x: 0, y: 0, width: size, height: size, cornerMask: 1)
+        addCorner(x: 0, y: 0, width: size, height: size, cornerMask: 2)
+        addCorner(x: 0, y: 0, width: size, height: size, cornerMask: 3)
 
         scannerFrameView = frameView
     }
@@ -268,8 +327,10 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         NSLayoutConstraint.activate([
             container.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             container.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            container.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
-            container.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24),
+            container.leadingAnchor.constraint(
+                greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
+            container.trailingAnchor.constraint(
+                lessThanOrEqualTo: view.trailingAnchor, constant: -24),
         ])
 
         permissionOverlayView = container
@@ -292,5 +353,32 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         preview?.frame = view.bounds
+
+        let scanAreaSize: CGFloat = 280
+        if let output = metadataOutput {
+            let previewRect = preview.frame
+            let x = (previewRect.width - scanAreaSize) / 2
+            let y = (previewRect.height - scanAreaSize) / 2
+            let scanRect = CGRect(x: x, y: y, width: scanAreaSize, height: scanAreaSize)
+            output.rectOfInterest = preview.metadataOutputRectConverted(fromLayerRect: scanRect)
+        }
+
+        if let overlayView = view.subviews.first(where: {
+            $0.backgroundColor == UIColor.black.withAlphaComponent(0.5)
+        }),
+            let maskLayer = overlayView.layer.mask as? CAShapeLayer
+        {
+            let outerPath = UIBezierPath(rect: overlayView.bounds)
+            let innerRect = CGRect(
+                x: (overlayView.bounds.width - scanAreaSize) / 2,
+                y: (overlayView.bounds.height - scanAreaSize) / 2,
+                width: scanAreaSize,
+                height: scanAreaSize
+            )
+            let innerPath = UIBezierPath(roundedRect: innerRect, cornerRadius: 16)
+            outerPath.append(innerPath)
+            outerPath.usesEvenOddFillRule = true
+            maskLayer.path = outerPath.cgPath
+        }
     }
 }

@@ -12,8 +12,8 @@ struct AddFood: View {
     @State private var presentSheet: Bool = false
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
-    private let defaultQueryServingInGrams: Double = 100
-
+    private let defaultServing: Double = 100
+    
     private enum EntryMode: String, CaseIterable {
         case search
         case scan
@@ -93,7 +93,7 @@ struct AddFood: View {
                 search: $searchText,
                 key: key
             ) { query in
-                await food.getFreshFood(food: query, quantity: defaultQueryServingInGrams)
+                await food.getFreshFood(food: query, quantity: defaultServing)
             }
 
         case .scan:
@@ -103,7 +103,7 @@ struct AddFood: View {
                 startScanning: $startScanning,
                 key: key
             ) { query in
-                await food.getProduct(food: query, quantity: defaultQueryServingInGrams)
+                await food.getProduct(food: query, quantity: defaultServing)
             }
             .environment(\.colorScheme, .dark)
         }

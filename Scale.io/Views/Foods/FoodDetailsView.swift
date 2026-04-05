@@ -6,8 +6,7 @@ struct FoodDetailsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var quantity: Double
     @State private var measurement: Measurement = .grams
-    @FocusState private var isServingFocused: Bool
-
+    
     init(food: Food?, onRegister: ((_ food: Food) async -> Void)? = nil) {
         self.food = food
         self.onRegister = onRegister
@@ -95,8 +94,6 @@ struct FoodDetailsView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
-        .focused($isServingFocused)
-        .animation(.easeInOut(duration: 0.15), value: isServingFocused)
     }
 
     private var servingInGrams: Double? {
