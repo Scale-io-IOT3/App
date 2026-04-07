@@ -60,14 +60,7 @@ struct FoodDetailsView: View {
 
             HStack(spacing: 10) {
                 amountField
-
-                Picker("Unit", selection: $measurement) {
-                    ForEach(Measurement.allCases, id: \.self) { unit in
-                        Text(unit.rawValue)
-                            .tag(unit)
-                    }
-                }
-                .pickerStyle(.menu)
+                unitPicker
 
                 Spacer(minLength: 0)
 
@@ -97,6 +90,46 @@ struct FoodDetailsView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
+    }
+
+    private var unitPicker: some View {
+        Menu {
+            ForEach(Measurement.allCases, id: \.self) { unit in
+                Button {
+                    measurement = unit
+                } label: {
+                    if unit == measurement {
+                        Label(unit.rawValue, systemImage: "checkmark")
+                    } else {
+                        Text(unit.rawValue)
+                    }
+                }
+            }
+        } label: {
+            HStack(alignment: .center, spacing: 6) {
+                Spacer()
+                
+                Text(measurement.rawValue)
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minWidth: 72)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+            )
+        }
+        .tint(.primary)
     }
 
     private var servingInGrams: Double? {
@@ -132,7 +165,6 @@ private struct FoodQualityView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
-                        .lineLimit(2)
                         .truncationMode(.tail)
                         .fixedSize(horizontal: false, vertical: true)
                         .layoutPriority(1)
