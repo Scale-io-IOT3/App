@@ -60,6 +60,8 @@ struct SearchView: View {
         isLoading = true
         toastVm.show(.loading("Searching..."), key, persist: true)
         let results = await fetch(search)
+        guard !Task.isCancelled else { return }
+
         isLoading = false
         foods = results
 
@@ -71,7 +73,7 @@ struct SearchView: View {
     }
 }
 
-struct StartSearch: View {
+fileprivate struct StartSearch: View {
     var body: some View {
         ContentUnavailableView(
             "Find a food",

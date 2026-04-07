@@ -16,7 +16,7 @@ enum AppErrorContext {
 }
 
 extension Error {
-    func userMessage(context: AppErrorContext = .generic) -> String {
+    func feedback(context: AppErrorContext = .generic) -> String {
         if let urlError = self as? URLError,
             let mapped = message(for: urlError)
         {

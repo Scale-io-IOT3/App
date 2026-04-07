@@ -23,12 +23,18 @@ class FoodViewModel: ObservableObject {
             let fetchedFoods = try await service.fetchFoods(request: request)
             self.foods = fetchedFoods
             self.lastFetchError = nil
+            return fetchedFoods
+        } catch is CancellationError {
+            self.lastFetchError = nil
+            return []
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            self.lastFetchError = nil
+            return []
         } catch {
             print("Failed to fetch \(food): \(error)")
             self.foods = []
-            self.lastFetchError = error.userMessage(context: .food)
+            self.lastFetchError = error.feedback(context: .food)
+            return []
         }
-
-        return self.foods
     }
 }

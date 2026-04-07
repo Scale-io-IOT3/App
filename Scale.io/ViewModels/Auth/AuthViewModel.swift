@@ -50,7 +50,7 @@ class AuthViewModel: ObservableObject {
             state = .authenticated
         } catch {
             state = .unauthenticated
-            self.error = error.userMessage(context: .auth)
+            self.error = error.feedback(context: .auth)
         }
     }
 
