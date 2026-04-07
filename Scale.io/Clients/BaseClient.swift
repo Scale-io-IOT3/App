@@ -3,7 +3,7 @@ import Foundation
 struct EmptyBody: Encodable {}
 
 class BaseClient {
-    private let baseURL: String = Config.API
+    private let baseURL: String = Config.DEV_API
     static let shared = BaseClient()
 
     private init() {}

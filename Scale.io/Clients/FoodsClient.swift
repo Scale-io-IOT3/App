@@ -3,9 +3,10 @@ import Foundation
 class FoodsClient {
     static let shared = FoodsClient()
     private init() {}
-    
-    func fetch(_ request : FoodRequest) async throws -> FoodResponse {
-        let encodedQuery = request.query
+
+    func fetch(_ request: FoodRequest) async throws -> FoodResponse {
+        let encodedQuery =
+            request.query
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .addingPercentEncoding(withAllowedCharacters: .urlPathSegmentAllowed)
             ?? request.query
@@ -14,8 +15,8 @@ class FoodsClient {
     }
 }
 
-private extension CharacterSet {
-    static let urlPathSegmentAllowed: CharacterSet = {
+extension CharacterSet {
+    fileprivate static let urlPathSegmentAllowed: CharacterSet = {
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: "-._~")
         return allowed

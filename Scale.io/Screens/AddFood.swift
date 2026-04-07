@@ -13,7 +13,7 @@ struct AddFood: View {
     @State private var startScanning: Bool = true
     @State private var searchText: String = ""
     private let defaultServing: Double = 100
-    
+
     private enum EntryMode: String, CaseIterable {
         case search
         case scan

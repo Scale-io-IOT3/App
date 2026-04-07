@@ -11,7 +11,7 @@ struct FoodHeaderView: View {
                 Text(food.name)
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if !food.brands.isEmpty {
                     Text(food.brands)

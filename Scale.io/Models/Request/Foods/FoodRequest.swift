@@ -12,7 +12,7 @@ struct FreshFoodRequest: FoodRequest {
     let grams: Double
 
     init(query: String, grams: Double) {
-        endpoint = "freshfoods"
+        endpoint = "search"
         self.query = query
         self.grams = grams
     }

@@ -5,10 +5,13 @@ struct Food: Codable, Identifiable, Equatable {
     let name, brands: String
     let quantity: Double
     let macros: Macros
+    var grade: String? = nil
+    var levels: NutrientLevels? = nil
     var tags: [FoodTagKind] = []
 
     enum CodingKeys: String, CodingKey {
-        case name, brands, quantity, macros
+        case name, brands, quantity, macros, grade
+        case levels = "nutrientLevels"
     }
 }
 
@@ -27,6 +30,18 @@ struct Nutriments: Codable {
         case carbohydrates
         case fat
         case proteins
+    }
+}
+
+struct NutrientLevels: Codable, Equatable {
+    let fat: String?
+    let salt: String?
+    let saturatedFat: String?
+    let sugars: String?
+
+    enum CodingKeys: String, CodingKey {
+        case fat, salt, sugars
+        case saturatedFat = "saturated-fat"
     }
 }
 
@@ -71,6 +86,8 @@ extension Food {
             brands: brands,
             quantity: safeQuantity,
             macros: scaledMacros,
+            grade: grade,
+            levels: levels,
             tags: tags
         )
     }

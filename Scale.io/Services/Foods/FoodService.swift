@@ -8,5 +8,4 @@ class FoodService {
         let response = try await client.fetch(request)
         return response.foods
     }
-    
 }

@@ -6,7 +6,7 @@ struct FoodDetailsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var quantity: Double
     @State private var measurement: Measurement = .grams
-    
+
     init(food: Food?, onRegister: ((_ food: Food) async -> Void)? = nil) {
         self.food = food
         self.onRegister = onRegister
@@ -21,8 +21,11 @@ struct FoodDetailsView: View {
                     servingEditor
                 }
                 MacrosGrid(food: activeFood)
+                FoodQualityView(food: activeFood)
 
                 if let onRegister {
+                    Spacer(minLength: 0)
+
                     CustomButton("Add Food", icon: "plus") {
                         guard let foodForLogging else { return }
                         Task { await onRegister(foodForLogging) }
@@ -100,6 +103,128 @@ struct FoodDetailsView: View {
         let grams = quantity * measurement.toGramsFactor
         guard grams.isFinite, grams > 0 else { return nil }
         return grams
+    }
+}
+
+private struct FoodQualityView: View {
+    private let vm: FoodQualityViewModel
+
+    init(food: Food) {
+        self.vm = FoodQualityViewModel(food: food)
+    }
+
+    var body: some View {
+        if vm.hasContent {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 8) {
+                    Text("Food Quality")
+                        .font(.headline)
+
+                    Spacer()
+
+                    if let grade = vm.grade {
+                        gradeBadge(grade)
+                    }
+                }
+
+                if let summary = vm.summary {
+                    Text(summary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
+                }
+
+                if !vm.nutrientItems.isEmpty {
+                    Text("Nutrient Levels")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                    LazyVGrid(
+                        columns: [
+                            GridItem(.flexible(), spacing: 10),
+                            GridItem(.flexible(), spacing: 10),
+                        ],
+                        alignment: .leading,
+                        spacing: 10
+                    ) {
+                        ForEach(vm.nutrientItems) { item in
+                            NutrientLevelPill(item: item)
+                        }
+                    }
+                }
+            }
+            .appCard(cornerRadius: 18, padding: 16)
+        }
+    }
+
+    private func gradeBadge(_ grade: FoodQualityViewModel.Grade) -> some View {
+        let color = gradeColor(for: grade)
+
+        return ZStack {
+            Circle()
+                .fill(color.opacity(0.16))
+
+            Circle()
+                .stroke(color.opacity(0.4), lineWidth: 1)
+
+            Text(grade.rawValue)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(color)
+                .textCase(.uppercase)
+        }
+        .frame(width: 30, height: 30)
+        .accessibilityLabel("Grade \(grade.rawValue)")
+    }
+
+    private func gradeColor(for grade: FoodQualityViewModel.Grade) -> Color {
+        switch grade {
+        case .a: return .green
+        case .b: return .teal
+        case .c: return .orange
+        case .d: return .red
+        case .e: return .pink
+        }
+    }
+}
+
+private struct NutrientLevelPill: View {
+    let item: FoodQualityViewModel.NutrientItem
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(item.label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(levelColor(item.level))
+                    .frame(width: 7, height: 7)
+                Text(item.levelLabel)
+                    .font(.caption.bold())
+                    .foregroundStyle(levelColor(item.level))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(levelColor(item.level).opacity(0.12))
+        )
+    }
+
+    private func levelColor(_ level: FoodQualityViewModel.NutrientLevel) -> Color {
+        switch level {
+        case .low: return .green
+        case .moderate: return .orange
+        case .high: return .red
+        }
     }
 }
 
