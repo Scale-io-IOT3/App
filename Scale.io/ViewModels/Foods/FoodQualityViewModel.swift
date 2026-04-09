@@ -4,10 +4,10 @@ struct FoodQualityViewModel {
     let grade: FoodQualityGrade?
     let summary: String?
     let nutrientItems: [NutrientItem]
-    let aiSummaryRequest: FoodQualityService.Request?
+    let aiSummaryRequest: QualitySummaryRequest?
     let summaryRequestID: String
 
-    private let aiService: FoodQualityService
+    private let aiSummaryResolver: any QualitySummaryResolver
 
     var hasContent: Bool {
         grade != nil || summary != nil || !nutrientItems.isEmpty
@@ -15,23 +15,29 @@ struct FoodQualityViewModel {
 
     init(
         food: Food,
-        hardcodedService: FallBackQualityService = .shared,
-        aiService: FoodQualityService = .shared
+        hardcodedService: any FoodQualityResultProvider = FallBackQualityService.shared,
+        aiSummaryProvider: any QualitySummaryProvider = FoodQualityService.shared,
+        aiSummaryResolver: any QualitySummaryResolver = FoodQualityService.shared
     ) {
-        let hardcoded = hardcodedService.makeResult(for: food)
-        let requestID = aiService.requestID(for: food)
+        let qualityData = FoodQualityData(food: food)
+        let hardcoded = hardcodedService.makeResult(from: qualityData)
+        let request = aiSummaryProvider.makeAIRequest(
+            for: food,
+            data: qualityData,
+            fallbackSummary: hardcoded.summary
+        )
 
         self.grade = hardcoded.grade
         self.summary = hardcoded.summary
         self.nutrientItems = hardcoded.nutrientItems
-        self.summaryRequestID = requestID
-        self.aiSummaryRequest = aiService.makeRequest(for: food, hardcoded: hardcoded)
-        self.aiService = aiService
+        self.aiSummaryRequest = request
+        self.summaryRequestID = request?.key ?? qualityData.requestKey
+        self.aiSummaryResolver = aiSummaryResolver
     }
 
     func resolveDisplaySummary() async -> String? {
         guard let fallback = summary else { return nil }
         guard let request = aiSummaryRequest else { return fallback }
-        return await aiService.resolve(request) ?? fallback
+        return await aiSummaryResolver.resolve(request) ?? fallback
     }
 }
