@@ -16,16 +16,21 @@ struct FoodDetailsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             if let activeFood {
-                FoodHeaderView(food: activeFood)
-                if onRegister != nil {
-                    servingEditor
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        FoodHeaderView(food: activeFood)
+                        if onRegister != nil {
+                            servingEditor
+                        }
+                        MacrosGrid(food: activeFood)
+                        FoodQualityView(food: activeFood)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, onRegister == nil ? 0 : 8)
                 }
-                MacrosGrid(food: activeFood)
-                FoodQualityView(food: activeFood)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
                 if let onRegister {
-                    Spacer(minLength: 0)
-
                     CustomButton("Add Food", icon: "plus") {
                         guard let foodForLogging else { return }
                         Task { await onRegister(foodForLogging) }
@@ -108,7 +113,7 @@ struct FoodDetailsView: View {
         } label: {
             HStack(alignment: .center, spacing: 6) {
                 Spacer()
-                
+
                 Text(measurement.rawValue)
                     .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
@@ -141,9 +146,16 @@ struct FoodDetailsView: View {
 
 private struct FoodQualityView: View {
     private let vm: FoodQualityViewModel
+    @State private var summaryState: SummaryState
 
     init(food: Food) {
-        self.vm = FoodQualityViewModel(food: food)
+        let vm = FoodQualityViewModel(food: food)
+        self.vm = vm
+        if vm.summary != nil {
+            _summaryState = State(initialValue: .loading)
+        } else {
+            _summaryState = State(initialValue: .hidden)
+        }
     }
 
     var body: some View {
@@ -160,15 +172,7 @@ private struct FoodQualityView: View {
                     }
                 }
 
-                if let summary = vm.summary {
-                    Text(summary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .truncationMode(.tail)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .layoutPriority(1)
-                }
+                summaryContent
 
                 if !vm.nutrientItems.isEmpty {
                     Text("Nutrient Levels")
@@ -190,7 +194,53 @@ private struct FoodQualityView: View {
                 }
             }
             .appCard(cornerRadius: 18, padding: 16)
+            .task(id: vm.summaryRequestID) {
+                guard vm.summary != nil else {
+                    summaryState = .hidden
+                    return
+                }
+
+                summaryState = .loading
+                let resolved = await resolveSummary()
+                guard !Task.isCancelled else { return }
+                summaryState = resolved
+            }
         }
+    }
+
+    @ViewBuilder
+    private var summaryContent: some View {
+        switch summaryState {
+        case .loading:
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Generating nutrition tips...")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        case .ready(let summary):
+            Text(summary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.leading)
+                .truncationMode(.tail)
+                .fixedSize(horizontal: false, vertical: true)
+                .layoutPriority(1)
+        case .hidden:
+            EmptyView()
+        }
+    }
+
+    private func resolveSummary() async -> SummaryState {
+        guard let summary = await vm.resolveDisplaySummary() else { return .hidden }
+        return .ready(summary)
+    }
+
+    private enum SummaryState: Equatable {
+        case hidden
+        case loading
+        case ready(String)
     }
 
     private func gradeBadge(_ grade: FoodQualityGrade) -> some View {
@@ -234,9 +284,6 @@ private struct NutrientLevelPill: View {
                 .lineLimit(1)
 
             HStack(spacing: 6) {
-                Circle()
-                    .fill(levelColor(item.level))
-                    .frame(width: 7, height: 7)
                 Text(item.levelLabel)
                     .font(.caption.bold())
                     .foregroundStyle(levelColor(item.level))

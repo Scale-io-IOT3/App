@@ -379,8 +379,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = revision;
+				revision = e0c7eebc5a4465a3c4680764f26b7a61f567cdaf;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
