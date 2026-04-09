@@ -1,58 +1,7 @@
 import Foundation
 
 struct FoodQualityViewModel {
-    enum Grade: String {
-        case a = "A"
-        case b = "B"
-        case c = "C"
-        case d = "D"
-        case e = "E"
-
-        init?(rawGrade: String?) {
-            guard let rawGrade = rawGrade?
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .uppercased(),
-                !rawGrade.isEmpty
-            else {
-                return nil
-            }
-
-            self.init(rawValue: String(rawGrade.prefix(1)))
-        }
-    }
-
-    enum NutrientLevel: String {
-        case low
-        case moderate
-        case high
-
-        init?(rawValue: String?) {
-            guard let normalized = rawValue?
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .lowercased()
-            else {
-                return nil
-            }
-
-            self.init(rawValue: normalized)
-        }
-
-        var displayLabel: String {
-            rawValue.capitalized
-        }
-    }
-
-    struct NutrientItem: Identifiable, Equatable {
-        let id: String
-        let label: String
-        let level: NutrientLevel
-
-        var levelLabel: String {
-            level.displayLabel
-        }
-    }
-
-    let grade: Grade?
+    let grade: FoodQualityGrade?
     let summary: String?
     let nutrientItems: [NutrientItem]
 
@@ -61,7 +10,7 @@ struct FoodQualityViewModel {
     }
 
     init(food: Food) {
-        let parsedGrade = Grade(rawGrade: food.grade)
+        let parsedGrade = FoodQualityGrade(rawGrade: food.grade)
         let parsedNutrients = Self.parseNutrients(from: food.levels)
 
         self.grade = parsedGrade
@@ -74,14 +23,14 @@ struct FoodQualityViewModel {
     }
 }
 
-private extension FoodQualityViewModel {
-    struct ParsedNutrient {
+extension FoodQualityViewModel {
+    fileprivate struct ParsedNutrient {
         let item: NutrientItem
         let priority: Int
         let advice: String
     }
 
-    enum NutrientKind: Int, CaseIterable {
+    fileprivate enum NutrientKind: Int, CaseIterable {
         case sugars = 0
         case saturatedFat = 1
         case salt = 2
@@ -110,7 +59,8 @@ private extension FoodQualityViewModel {
             case .sugars:
                 switch level {
                 case .high:
-                    return "Tip: keep portions moderate and pair with protein or fiber to reduce sugar spikes."
+                    return
+                        "Tip: keep portions moderate and pair with protein or fiber to reduce sugar spikes."
                 case .moderate:
                     return "Tip: avoid extra sweet add-ons and pair with protein or fiber."
                 case .low:
@@ -119,7 +69,8 @@ private extension FoodQualityViewModel {
             case .saturatedFat:
                 switch level {
                 case .high:
-                    return "Tip: balance this with lean protein and unsaturated fats like nuts, seeds, or olive oil."
+                    return
+                        "Tip: balance this with lean protein and unsaturated fats like nuts, seeds, or olive oil."
                 case .moderate:
                     return "Tip: keep the rest of the meal lighter in saturated fat."
                 case .low:
@@ -147,7 +98,7 @@ private extension FoodQualityViewModel {
         }
     }
 
-    static func parseNutrients(from levels: NutrientLevels?) -> [ParsedNutrient] {
+    fileprivate static func parseNutrients(from levels: NutrientLevels?) -> [ParsedNutrient] {
         guard let levels else { return [] }
 
         return NutrientKind.allCases.compactMap { kind in
@@ -173,7 +124,7 @@ private extension FoodQualityViewModel {
         }
     }
 
-    static func topConcern(from nutrients: [ParsedNutrient]) -> ParsedNutrient? {
+    fileprivate static func topConcern(from nutrients: [ParsedNutrient]) -> ParsedNutrient? {
         nutrients
             .filter { $0.priority > 0 }
             .sorted { lhs, rhs in
@@ -185,7 +136,7 @@ private extension FoodQualityViewModel {
             .first
     }
 
-    static func baseSummary(for grade: Grade?) -> String? {
+    fileprivate static func baseSummary(for grade: FoodQualityGrade?) -> String? {
         switch grade {
         case .a:
             return "Excellent nutrition profile."
@@ -202,7 +153,7 @@ private extension FoodQualityViewModel {
         }
     }
 
-    static func fallbackAdvice(for grade: Grade?) -> String? {
+    fileprivate static func fallbackAdvice(for grade: FoodQualityGrade?) -> String? {
         switch grade {
         case .a:
             return "Keep foods like this in regular rotation and maintain variety across your week."
@@ -219,7 +170,9 @@ private extension FoodQualityViewModel {
         }
     }
 
-    static func makeSummary(grade: Grade?, topConcern: ParsedNutrient?, hasNutrients: Bool) -> String? {
+    fileprivate static func makeSummary(
+        grade: FoodQualityGrade?, topConcern: ParsedNutrient?, hasNutrients: Bool
+    ) -> String? {
         if let topConcern {
             if let base = baseSummary(for: grade) {
                 return "\(base) \(topConcern.advice)"
@@ -232,7 +185,8 @@ private extension FoodQualityViewModel {
         }
 
         if hasNutrients {
-            return "No overall grade available. Use nutrient levels to guide portions and meal pairings."
+            return
+                "No overall grade available. Use nutrient levels to guide portions and meal pairings."
         }
 
         return nil

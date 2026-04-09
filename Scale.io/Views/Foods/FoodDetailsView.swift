@@ -193,7 +193,7 @@ private struct FoodQualityView: View {
         }
     }
 
-    private func gradeBadge(_ grade: FoodQualityViewModel.Grade) -> some View {
+    private func gradeBadge(_ grade: FoodQualityGrade) -> some View {
         let color = gradeColor(for: grade)
 
         return ZStack {
@@ -212,7 +212,7 @@ private struct FoodQualityView: View {
         .accessibilityLabel("Grade \(grade.rawValue)")
     }
 
-    private func gradeColor(for grade: FoodQualityViewModel.Grade) -> Color {
+    private func gradeColor(for grade: FoodQualityGrade) -> Color {
         switch grade {
         case .a: return .green
         case .b: return .teal
@@ -224,7 +224,7 @@ private struct FoodQualityView: View {
 }
 
 private struct NutrientLevelPill: View {
-    let item: FoodQualityViewModel.NutrientItem
+    let item: NutrientItem
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -251,7 +251,7 @@ private struct NutrientLevelPill: View {
         )
     }
 
-    private func levelColor(_ level: FoodQualityViewModel.NutrientLevel) -> Color {
+    private func levelColor(_ level: NutrientLevel) -> Color {
         switch level {
         case .low: return .green
         case .moderate: return .orange
